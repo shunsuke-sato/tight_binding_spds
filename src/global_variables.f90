@@ -56,6 +56,9 @@ module global_variables
   real(8) :: delta_a
   real(8) :: delta_c
 
+! two-body integral
+  real(8),allocatable :: E2c_int(:,:,:)
+
 
 
 end module global_variables

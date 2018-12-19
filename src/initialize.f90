@@ -34,6 +34,7 @@ subroutine initialize
 
   num_nearest_neighbor = 4
   allocate(Rvec_ac(3,num_nearest_neighbor))
+  allocate(E2c_int(10,10,num_nearest_neighbor))
 
   Rvec_ac(:,1) = lattice_const*0.25d0
   Rvec_ac(:,2) = lattice_const*0.25d0 - lattice_vec(:,1)
