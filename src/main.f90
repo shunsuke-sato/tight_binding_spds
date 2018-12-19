@@ -5,7 +5,8 @@ program main
   call init_parallel
   call init_input
 
-
+  call input
+  call initialize
 
   call fin_input
   call fin_parallel
