@@ -6,6 +6,7 @@ subroutine initialize
   allocate(zpsi(nband,nspin,nkpoint), zHam_mat(nband,nband,nkpoint))
 
 ! nband = 1-20
+!! anion spin-up
 ! 1 = s
 ! 2 = px
 ! 3 = py
@@ -14,8 +15,20 @@ subroutine initialize
 ! 6 = dyz
 ! 7 = dzx
 ! 8 = dx2-y2
-! 9 = d3r2-z2
+! 9 = d3z2-r2
 !10 = s*
+!! cation spin-up
+!11 = s
+!12 = px
+!13 = py
+!14 = pz
+!15 = dxy
+!16 = dyz
+!17 = dzx
+!18 = dx2-y2
+!19 = d3z2-r2
+!20 = s*
+!! spin down components (31-40)
 
   lattice_vec(1,1) = 0d0
   lattice_vec(2,1) = 1d0
