@@ -57,9 +57,65 @@ subroutine calc_two_center_integral
     E2c_int(3,8,i) = 0.5d0*sqrt(3d0)*m*(l**2-m**2)*padc_sigma &
                      -m*(1d0+l**2-m**2)*padc_pi !y,x2-y2
     E2c_int(3,9,i) = m*(n**2-0.5d0*(l**2+m**2))*padc_sigma &
-                     -sqrt(3d0)*m*n**2*padc*pi !y,3r2-z2
+                     -sqrt(3d0)*m*n**2*padc*pi !y,3z2-r2
     E2c_int(3,10,i) = (-1d0)*m*s2cpa_sigma !y,s2
 
+! anion pz-orbital
+    E2c_int(4,1,i)  = (-1d0)*n*scpa_sigma !z,s
+    E2c_int(4,2,i)  = n*l*pp_sigma-n*l*pp_pi !z,x
+    E2c_int(4,3,i)  = m*n*pp_sigma-m*n*pp_pi !z,y
+    E2c_int(4,4,i)  = n**2*pp_sigma+(1d0-n**2)*p_pi !z,z
+    E2c_int(4,5,i)  = sqrt(3d0)*l*m*n*padc_sigma-2d0*l*m*n*padc_pi !z,xy
+    E2c_int(4,6,i)  = sqrt(3d0)*n**2*m*padc_sigma+m*(1d0-2d0*n**2)*padc_pi !z,yz
+    E2c_int(4,7,i)  = sqrt(3d0)*n**2*l*padc_sigma+l*(1d0-2d0*n**2)*padc_pi !z,zx
+    E2c_int(4,8,i)  = 0.5d0*sqrt(3d0)*n*(l**2-m**2)*padc_sigma &
+                      -n**(l**2-m**2)*padc_pi !z,x2-y2
+    E2c_int(4,9,i)  = n*(n**2-0.5d0*(l**2+m**2))*padc_sigma &
+                      +sqrt(3d0)*n*(l**2+m**2)*padc_pi !z,3z2-r2
+    E2c_int(4,10,i) = (-1d0)*n*s2cpa_sigma !z,s2
+
+! anion dxy-orbital
+    E2c_int(5,1,i)  =  sqrt(3d0)*l*m*scda_sigma !xy,s
+    E2c_int(5,2,i)  =  (-1d0)*(sqrt(3d0)*l**2*m*pcda_sigma &
+                       +m*(1d0-2d0*l**2)*pcda_pi) !xy,x
+    E2c_int(5,3,i)  =  (-1d0)*(sqrt(3d0)*m**2*l*pcda_sigma &
+                       +l*(1d0-2d0*m**2)*pcda_pi) !xy,y
+    E2c_int(5,4,i)  =  (-1d0)*(sqrt(3d0)*l*m*n*pcda_sigma &
+                       -2d0*l*m*n*pcda_pi) !xy,z
+    E2c_int(5,5,i)  =  3d0*l**2*m**2*dd_sigma+(l**2+m**2-4d0*l**2*m**2)*dd_pi &
+                       +(n**2+l**2*m**2)*dd_delta !xy,xy
+    E2c_int(5,6,i)  =  3d0*l*m**2*n*dd_sigma+l*n*(1d0-4d0*m**2)*dd_pi &
+                       +l*n*(m**2-1d0)*dd_delta !xy,yz
+    E2c_int(5,7,i)  =  3d0*l**2*m*n*dd_sigma+m*n*(1d0-4d0*l**2)*dd_pi &
+                       +m*n*(l**2-1d0)*dd_delta !xy,zx
+    E2c_int(5,8,i)  =  1.5d0*l*m*(l**2-m**2)*dd_sigma+2d0*l*m*(m**2-l**2)*dd_pi &
+                       0.5d0*l*m*(l**2-m**2)*dd_delta !xy,x2-y2
+    E2c_int(5,9,i)  =  sqrt(3d0)*l*m*(n**2-0.5d0*(l**2+m**2))*dd_sigma &
+                       -2d0*sqrt(3d0)*l*m*n**2*dd_pi &
+                       +0.5d0*sqrt(3d0)*l*m*(1d0+n**2)*dd_delta !xy,3z2-r2
+    E2c_int(5,10,i) =  sqrt(3d0)*l*m*s2cda_sigma !xy,s2
+
+! anion dyz-orbital
+    E2c_int(6,1,i)  = sqrt(3d0)*m*n*scda_sigma !yz,s
+    E2c_int(6,2,i)  = (-1d0)*(sqrt(3d0)*l*m*n*pcda_sigma &
+                      -2d0*l*m*n*pcda_pi) !yz,x
+    E2c_int(6,3,i)  = (-1d0)*(sqrt(3d0)*m**2*n*pcda_sigma &
+                      +n*(1d0-2d0*m**2)*pcda_pi) !yz,y
+    E2c_int(6,4,i)  = (-1d0)*(sqrt(3d0)*n**2*m*pcda_sigma &
+                      +m*(1d0-1d0*m**2)*pcda_pi) !yz,z
+    E2c_int(6,5,i)  = 3d0*l*m**2*n*dd_sigma+l*n*(1d0-4d0*m**2)*dd_pi &
+                      l*n*(m**2-1d0)*dd_delta !yz,xy
+    E2c_int(6,6,i)  = 3d0*m**2*n**2*dd_sigma+(m**2+n**2-4d0*m**2*n**2)*dd_pi &
+                      +(l**2+m**2*n**2)*dd_delta !yz,yz
+    E2c_int(6,7,i)  = 3d0*m*n**2*l*dd_sigma+m*l*(1d0-4d0*n**2)*dd_pi &
+                      +m*l*(n**2-1d0)*dd_delta !yz,zx
+    E2c_int(6,8,i)  = 1.5d0*m*n*(l**2-m**2)*dd_sigma &
+                      -m*n*(1d0+2d0*(l**2-m**2))*dd_pi &
+                      +m*n*(1d0+0.5d0*(l**2-m**2))*dd_delta !yz,x2-y2
+    E2c_int(6,9,i)  = sqrt(3d0)*m*n*(n**2-0.5d0*(l**2+m**2))*dd_sigma &
+                      +sqrt(3d0)*m*n*(l**2+m**2-n**2)*dd_pi &
+                      -0.5d0*sqrt(3d0)*m*n*(l**2+m**2) !yz,3z2-r2
+    E2c_int(6,10,i) = sqrt(3d0)*m*n*s2cda_sigma !yz,s2
 
   end do
 
