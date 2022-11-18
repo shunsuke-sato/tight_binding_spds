@@ -161,6 +161,43 @@ subroutine calc_two_center_integral
                       +0.25d0*sqrt(3d0)*(1d0+n**2)*(l**2-m**2)*dd_delta !x2-y2,3z2-r2
     E2c_int(8,10,i) = 0.5d0*sqrt(3d0)*(l**2-m**2)*s2cda_sigma !x2-y2,s2
 
+! anion d3z2-r2-orbital
+    E2c_int(9,1,i)  = (n**2-0.5d0*(l**2+m**2))*scda_sigma !3z2-r2,s
+    E2c_int(9,2,i)  = (-1d0)*(l*(n**2-0.5d0*(l**2+m**2))*pcda_sigma &
+                      -sqrt(3d0)*l*n**2*pcda_pi) !3z2-r2,x
+    E2c_int(9,3,i)  = (-1d0)*(m*(n**2-0.5d0*(l**2+m**2))*pcda_sigma &
+                      -sqrt(3d0)*m*n**2*pcda_pi) !3z2-r2,y
+    E2c_int(9,4,i)  = (-1d0)*(n*(n**2-0.5d0*(l**2+m**2))*pcda_sigma &
+                      +sqrt(3d0)*n*(l**2+m**2)*pcda_pi) !3z2-r2,z
+    E2c_int(9,5,i)  = sqrt(3d0)*l*m*(n**2-0.5d0*(l**2+m**2))*dd_sigma &
+                      -2d0*sqrt(3d0)*l*m*n**2*dd_pi &
+                      +0.5d0*sqrt(3d0)*l*m*(1d0+n**2)*dd_delta !3z2-r2,xy
+    E2c_int(9,6,i)  = sqrt(3d0)*m*n*(n*-0.5d0*(l**2+m**2))*dd_sigma &
+                      +sqrt(3d0)*m*n*(l**2+m**2-n**2)*dd_pi &
+                      -0.5d0*sqrt(3d0)*m*n*(l**2+m**2)*dd_delta !3z2-r2,yz
+    E2c_int(9,7,i)  = sqrt(3d0)*l*n*(n**2-0.5d0*(l**2+m**2))*dd_sigma &
+                      +sqrt(3d0)*l*n*(l**2+m**2-n**2)*dd_pi &
+                      -0.5d0*sqrt(3d0)*l*n*(l**2+m**2)*dd_delta !3z2-r2,zx
+    E2c_int(9,8,i)  = 0.5d0*sqrt(3d0)*(l**2-m**2)*(n**2-0.5d0*(l**2+m**2))*dd_sigma &
+                      +sqrt(3d0)*n**2(m**2-l**2)*dd_pi &
+                      0.25d0*sqrt(3d0)*(1d0+n**2)*(l**2-m**2)*dd_delta !3z2-r2,x2-y2
+    E2c_int(9,9,i)  = (n**2-0.5d0*(l**2+m**2))**2*dd_sigma &
+                      +3d0*n**2*(l**2+m**2)*dd_pi &
+                      +0.75d0*(l**2+m**2)**2*dd_delta !3z2-r2,3z2-r2
+    E2c_int(9,10,i) = (n**2-0.5d0*(l**2+m**2))*s2cda_sigma !3z2-r2,s2
+
+! anion s2-orbital
+    E2c_int(10,1,i)  = s2a_ac_sigma !s2,s
+    E2c_int(10,2,i)  = l*s2apc_sigma !s2,x
+    E2c_int(10,3,i)  = m*s2apc_sigma !s2,y
+    E2c_int(10,4,i)  = n*s2apc_sigma !s2,z
+    E2c_int(10,5,i)  = sqrt(3d0)*l*m*s2adc_sigma !s2,xy
+    E2c_int(10,6,i)  = sqrt(3d0)*m*n*s2adc_sigma !s2,yz
+    E2c_int(10,7,i)  = sqrt(3d0)*n*l*s2adc_sigma !s2,zx
+    E2c_int(10,8,i)  = 0.5d0*sqrt(3d0)*(l**2-m**2)*s2adc_sigma !s2,x2-y2
+    E2c_int(10,9,i)  = (n**2-0.5d0*(l**2+m**2))*s2adc_sigma !s2,3z2-r2
+    E2c_int(10,10,i) = s2s2_sigma !s2,s2
+
   end do
 
 end subroutine calc_two_center_integral
