@@ -137,7 +137,7 @@ subroutine calc_two_center_integral
     E2c_int(7,9,i)  = sqrt(3d0)*l*n*(n**2-0.5d0*(l**2+m**2))*dd_sigma &
                       +sqrt(3d0)*l*n*(l**2+m**2-n**2)*dd_pi &
                       -0.5d0*sqrt(3d0)*l*n*(l**2+m**2)*dd_delta !zx,3z2-r2
-    E2c_int(7,10,i) = sqrt(3d0)*n+l*s2cda_sigma !zx,s2
+    E2c_int(7,10,i) = sqrt(3d0)*n*l*s2cda_sigma !zx,s2
 
 ! anion dx2-y2-orbital
     E2c_int(8,1,i)  = 0.5d0*sqrt(3d0)*(l**2-m**2)*scda_sigma !x2-y2,s

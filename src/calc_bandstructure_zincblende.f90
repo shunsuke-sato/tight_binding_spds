@@ -122,7 +122,7 @@ subroutine calc_bandstructure_zincblende
   do ik = 1, nkpoint
 
     call zheev('V', 'U', ndim, zham_mat(:,:,ik), ndim, w, work_lp, lwork, rwork, info)
-    write(20,"(999e26.16e3)")kk(ik),kvec(:,ik),w
+    write(20,"(999e26.16e3)")kk(ik)/kk(nkpoint),kvec(:,ik),w
 
   end do
   close(20)

@@ -1,7 +1,8 @@
 ! GaAs parameters from Phys. Rev. B 57 6493 (1998).  
 
 
-  energy_unit_tb = 4.7065*ev
+!  energy_unit_tb = 4.7065*ev
+  energy_unit_tb = 1d0*ev
 
   Ea_s   = -5.9819d0*energy_unit_tb
   Ec_s   = -0.4028d0*energy_unit_tb
