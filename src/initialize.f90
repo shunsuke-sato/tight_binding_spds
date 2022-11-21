@@ -1,8 +1,10 @@
 subroutine initialize
   use global_variables
   implicit none
+  real(8) :: vec_t(3)
 
-
+  allocate(kvec0(3,nkpoint),kvec(3,nkpoint))
+  kvec0 = 0d0; kvec=0d0
   allocate(zpsi(nband,nspin,nkpoint), zHam_mat(nband,nband,nkpoint))
 
 ! nband = 1-20
@@ -43,7 +45,13 @@ subroutine initialize
   lattice_vec(3,3) = 0d0
   
   lattice_vec = 0.5d0*lattice_const*lattice_vec
+  vec_t = cross_product(lattice_vec(:,2),lattice_vec(:,3))
+  volume = sum(lattice_vec(:,1)*vec_t(:))
+  write(*,*)"volume=",volume
 
+  reciprocal_lattice_vec(:,1)=2d0*pi/volume*cross_product(lattce_vec(:,2),lattce_vec(:,3))
+  reciprocal_lattice_vec(:,2)=2d0*pi/volume*cross_product(lattce_vec(:,3),lattce_vec(:,1))
+  reciprocal_lattice_vec(:,3)=2d0*pi/volume*cross_product(lattce_vec(:,1),lattce_vec(:,2))
 
   num_nearest_neighbor = 4
   allocate(Rvec_ac(3,num_nearest_neighbor))
@@ -61,5 +69,14 @@ subroutine initialize
 
 
   include "include_tb_parameters/set_GaAs_Jancu1998.f90"
+
+contains
+  function cross_product(vec1, vec2)
+    real(8) :: cross_product(3)
+    real(8) :: vec1(3), vec2(3)
+
+    cross_product(1) = vec1(2)*vec2(3)-vec1(3)*vec2(2)
+    cross_product(2) = vec1(3)*vec2(1)-vec1(1)*vec2(3)
+    cross_product(3) = vec1(1)*vec2(2)-vec1(2)*vec2(1)
 
 end subroutine initialize

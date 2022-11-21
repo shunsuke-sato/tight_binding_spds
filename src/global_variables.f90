@@ -10,10 +10,12 @@ module global_variables
   integer,parameter :: material_class = n_zincblende
 
 ! tight-binding
-  real(8) :: lattice_vec(3,3), lattice_const
+  real(8) :: lattice_vec(3,3), lattice_const, volume
+  real(8) :: reciprocal_lattice_vec(3,3)
   integer,parameter :: nspin = 2
   integer :: nband, nkpoint
   integer :: nkx, nky, nkz
+  real(8),allocatable :: kvec0(:,:),kvec(:,:)
   complex(8),allocatable :: zpsi(:,:,:)
   complex(8),allocatable :: zHam_mat(:,:,:)
 
