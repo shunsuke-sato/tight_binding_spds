@@ -8,6 +8,8 @@ program main
   call input
   call initialize
 
+  call calc_bandstructure_zincblende
+
   call fin_input
   call fin_parallel
 

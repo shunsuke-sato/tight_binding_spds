@@ -5,8 +5,8 @@ FC = mpif90 -O2 ## gfotran
 #FC = mpiifort -O3 -ipo -xHOST -L/mpcdf/soft/SLES122/common/intel/ps2017.7/17.0/linux/mkl/lib/intel64 -lmkl_intel_lp64 -lmkl_core -lmkl_sequential -lpthread -Wl,-rpath,/mpcdf/soft/SLES122/common/intel/ps2017.7/17.0/linux/mkl/lib/intel64 ## draco
 #FC = mpiifort -O3 -ipo -xHOST ## draco
 
-#LN = -llapack -lblas
-LN = 
+LN = -llapack -lblas
+#LN = 
 
 VPATH = src:object
 SRC = $(shell cd src ;ls *.f90 ;cd ..)
