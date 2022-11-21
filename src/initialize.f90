@@ -49,9 +49,9 @@ subroutine initialize
   volume = sum(lattice_vec(:,1)*vec_t(:))
   write(*,*)"volume=",volume
 
-  reciprocal_lattice_vec(:,1)=2d0*pi/volume*cross_product(lattce_vec(:,2),lattce_vec(:,3))
-  reciprocal_lattice_vec(:,2)=2d0*pi/volume*cross_product(lattce_vec(:,3),lattce_vec(:,1))
-  reciprocal_lattice_vec(:,3)=2d0*pi/volume*cross_product(lattce_vec(:,1),lattce_vec(:,2))
+  reciprocal_lattice_vec(:,1)=2d0*pi/volume*cross_product(lattice_vec(:,2),lattice_vec(:,3))
+  reciprocal_lattice_vec(:,2)=2d0*pi/volume*cross_product(lattice_vec(:,3),lattice_vec(:,1))
+  reciprocal_lattice_vec(:,3)=2d0*pi/volume*cross_product(lattice_vec(:,1),lattice_vec(:,2))
 
   num_nearest_neighbor = 4
   allocate(Rvec_ac(3,num_nearest_neighbor))
@@ -78,5 +78,7 @@ contains
     cross_product(1) = vec1(2)*vec2(3)-vec1(3)*vec2(2)
     cross_product(2) = vec1(3)*vec2(1)-vec1(1)*vec2(3)
     cross_product(3) = vec1(1)*vec2(2)-vec1(2)*vec2(1)
+
+  end function cross_product
 
 end subroutine initialize

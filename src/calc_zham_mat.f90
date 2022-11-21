@@ -1,14 +1,12 @@
-program calc_zham_mat
+subroutine calc_zham_mat
   use global_variables
   implicit  none
   integer :: ik,i,ia,ic
-  complex(8) :: zt,
+  complex(8) :: zphase
 
 
   zham_mat = 0d0
   do ik = 1, nkpoint
-    zt = 0d0
-
 
     zham_mat( 1, 1,:)=Ea_s
     zham_mat( 2, 2,:)=Ea_p
@@ -32,13 +30,12 @@ program calc_zham_mat
     zham_mat(19,19,:)=Ec_d
     zham_mat(20,20,:)=Ec_s2
     do ia = 1, 10
-      do ib = 1, 10
+      do ic = 1, 10
 
         
         do i = 1, num_nearest_neighbor
           zphase=exp(zi*sum(kvec(:,ik)*Rvec_ac(:,i)))
-          zt = zt+zphase
-          zham_mat(ia,10+ib,ik)=zham_mat(ia,10+ib,ik) + E2c_int(ia,ib,i)*zphase
+          zham_mat(ia,10+ic,ik)=zham_mat(ia,10+ic,ik) + E2c_int(ia,ic,i)*zphase
         end do
 
       end do
@@ -46,12 +43,12 @@ program calc_zham_mat
 
 
     do ia = 1, 10
-      do ib = 1, 10
-        zham_mat(10+ib,ia,ik)=conjg(zham_mat(ia,10+ib,ik))
+      do ic = 1, 10
+        zham_mat(10+ic,ia,ik)=conjg(zham_mat(ia,10+ic,ik))
       end do
     end do
   end do
 
-  zham_mat(21:40,21:40) = zham_mat(1:20,1:20)
+  zham_mat(21:40,21:40,:) = zham_mat(1:20,1:20,:)
 
-end program calc_zham_mat
+end subroutine calc_zham_mat

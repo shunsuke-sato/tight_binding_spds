@@ -6,6 +6,7 @@ FC = mpif90 -O2 ## gfotran
 #FC = mpiifort -O3 -ipo -xHOST ## draco
 
 #LN = -llapack -lblas
+LN = 
 
 VPATH = src:object
 SRC = $(shell cd src ;ls *.f90 ;cd ..)
@@ -19,7 +20,8 @@ $(PROG):math.o \
         communication.o \
         constants.o \
         io_mod.o \
-        global_variables.o $(OBJ)
+        global_variables.o \
+        main.o $(OBJ)
 	$(FC) -o $(PROG) $(OBJ_dir) $(LN)
 
 main.o:main.f90
