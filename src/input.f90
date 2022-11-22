@@ -3,13 +3,15 @@ subroutine input
   implicit none
 
   nband = 2*2*(1+3+5+1)
-  nkx = 8
-  nky = 8
-  nkz = 8
+  nkx = 9
+  nky = 9
+  nkz = 9
   nkpoint = nkx*nky*nkz
   
 
   lattice_const = 5.4635d0*angstrom
+
+!  lattice_const = 100d0
   
 
 

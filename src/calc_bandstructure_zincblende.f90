@@ -3,7 +3,7 @@ subroutine calc_bandstructure_zincblende
   implicit none
   integer :: ik, nkpoint_8
   real(8):: kvec_L(3), kvec_Gamma(3), kvec_X(3)
-  real(8):: kvec_W(3), kvec_K(3)
+  real(8):: kvec_W(3), kvec_K(3), kvec_U(3)
   real(8),allocatable :: kk(:)
 !LAPACK
   integer :: ndim
@@ -13,24 +13,46 @@ subroutine calc_bandstructure_zincblende
   integer :: info
 
   ndim = 40
-  lwork = 4*ndim**2+4*ndim+128
+  lwork = 4*ndim**2+4*ndim+256
   allocate(work_lp(lwork),rwork(3*ndim-2),w(ndim))
 
 
 !LAPACK
   allocate(kk(nkpoint)); kk = 0d0
 
-  kvec_L=2d0*pi/lattice_const*0.5d0
+!  kvec_L=2d0*pi/lattice_const*0.5d0
+!  kvec_Gamma = 0d0
+!  kvec_X=0d0; kvec_X(1)=2d0*pi/lattice_const
+!  kvec_W=0d0; kvec_W(1)=2d0*pi/lattice_const; kvec_W(2)=2d0*pi/lattice_const*0.5d0
+!  kvec_K=2d0*pi/lattice_const*0.75d0; kvec_K(3)=0d0
+!  kvec_U(1)=1d0;kvec_U(2)=0.25d0;kvec_U(3)=0.25d0; kvec_U=kvec_U*2d0*pi/lattice_const
+
   kvec_Gamma = 0d0
-  kvec_X=0d0; kvec_X(1)=2d0*pi/lattice_const
-  kvec_W=0d0; kvec_W(1)=2d0*pi/lattice_const; kvec_W(2)=2d0*pi/lattice_const*0.5d0
-  kvec_K=2d0*pi/lattice_const*0.75d0; kvec_K(3)=0d0
+  kvec_L = 0.50d0*reciprocal_lattice_vec(:,1) &
+          +0.50d0*reciprocal_lattice_vec(:,2) &
+          +0.50d0*reciprocal_lattice_vec(:,3)
+
+  kvec_X = 0.00d0*reciprocal_lattice_vec(:,1) &
+          +0.50d0*reciprocal_lattice_vec(:,2) &
+          +0.50d0*reciprocal_lattice_vec(:,3)
+
+  kvec_W = 0.25d0*reciprocal_lattice_vec(:,1) &
+          +(3d0/4d0)*reciprocal_lattice_vec(:,2) &
+          +0.50d0*reciprocal_lattice_vec(:,3)
+
+  kvec_K = (3d0/8d0)*reciprocal_lattice_vec(:,1) &
+          +(3d0/4d0)*reciprocal_lattice_vec(:,2) &
+          +(3d0/8d0)*reciprocal_lattice_vec(:,3)
+
+  kvec_U = (1d0/4d0)*reciprocal_lattice_vec(:,1) &
+          +(5d0/8d0)*reciprocal_lattice_vec(:,2) &
+          +(5d0/8d0)*reciprocal_lattice_vec(:,3)
 
 
   kvec0 = 0d0
   
-  nkpoint_8 = nkpoint/8
-  if(mod(nkpoint,8)/=0)then
+  nkpoint_8 = nkpoint/9
+  if(mod(nkpoint,9)/=0)then
     write(*,*)"mod(nkpoint,8)/=0"
     stop
   end if
@@ -102,17 +124,30 @@ subroutine calc_bandstructure_zincblende
     end if
   end do
 
-
-!K to Gamma
+!X to U
   do ik = 1,nkpoint_8
-    kvec(:,ik+7*nkpoint_8) = kvec_K(:) +(ik-1)*(kvec_Gamma(:)-kvec_K(:))/(nkpoint_8-1)
+    kvec(:,ik+7*nkpoint_8) = kvec_X(:) +(ik-1)*(kvec_U(:)-kvec_X(:))/nkpoint_8
     if(ik==0)then
       kk(ik+7*nkpoint_8)=kk(ik+7*nkpoint_8-1)+sqrt(sum((kvec_X(:)-kvec_W(:))**2))/nkpoint_8
     else
-      kk(ik+7*nkpoint_8)=kk(ik+7*nkpoint_8-1)+sqrt(sum((kvec_Gamma(:)-kvec_K(:))**2))/(nkpoint_8-1)
+      kk(ik+7*nkpoint_8)=kk(ik+7*nkpoint_8-1)+sqrt(sum((kvec_U(:)-kvec_X(:))**2))/nkpoint_8
     end if
   end do
 
+
+!K to Gamma
+  do ik = 1,nkpoint_8
+    kvec(:,ik+8*nkpoint_8) = kvec_K(:) +(ik-1)*(kvec_Gamma(:)-kvec_K(:))/(nkpoint_8-1)
+    if(ik==0)then
+      kk(ik+8*nkpoint_8)=kk(ik+8*nkpoint_8-1)+sqrt(sum((kvec_U(:)-kvec_X(:))**2))/nkpoint_8
+    else
+      kk(ik+8*nkpoint_8)=kk(ik+8*nkpoint_8-1)+sqrt(sum((kvec_Gamma(:)-kvec_K(:))**2))/(nkpoint_8-1)
+    end if
+  end do
+
+
+!  kvec(:,1)=kvec_K
+!  kvec(:,2)=kvec_U
 
   call calc_two_center_integral
   call calc_zham_mat
@@ -121,7 +156,7 @@ subroutine calc_bandstructure_zincblende
   open(20,file="bandstructure.out")
   do ik = 1, nkpoint
 
-    call zheev('V', 'U', ndim, zham_mat(:,:,ik), ndim, w, work_lp, lwork, rwork, info)
+    call zheev('V', 'U', ndim, zham_mat(1:ndim,1:ndim,ik), ndim, w, work_lp, lwork, rwork, info)
     write(20,"(999e26.16e3)")kk(ik)/kk(nkpoint),kvec(:,ik),w
 
   end do
