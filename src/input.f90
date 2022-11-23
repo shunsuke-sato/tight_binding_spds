@@ -3,9 +3,9 @@ subroutine input
   implicit none
 
   nband = 2*2*(1+3+5+1)
-  nkx = 9
-  nky = 9
-  nkz = 9
+  nkx = 9*2
+  nky = 9*2
+  nkz = 9*2
   nkpoint = nkx*nky*nkz
   
 

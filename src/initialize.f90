@@ -86,8 +86,8 @@ subroutine initialize
   write(*,*)"vec1=",Rvec_ac(:,3)
   write(*,*)"vec1=",Rvec_ac(:,4)
 
-  include "include_tb_parameters/set_GaAs_Jancu1998.f90"
-!  include "include_tb_parameters/set_GaAs_Tan2013.f90"
+!  include "include_tb_parameters/set_GaAs_Jancu1998.f90"
+  include "include_tb_parameters/set_GaAs_Tan2013.f90"
 
 contains
   function cross_product(vec1, vec2)
