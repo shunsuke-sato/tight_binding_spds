@@ -30,7 +30,7 @@ subroutine initialize
 !18 = dx2-y2
 !19 = d3z2-r2
 !20 = s*
-!! spin down components (31-40)
+!! spin down components (21-40)
 
   lattice_vec(1,1) = 0d0
   lattice_vec(2,1) = 1d0

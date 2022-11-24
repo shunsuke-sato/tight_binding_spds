@@ -51,4 +51,33 @@ subroutine calc_zham_mat
 
   zham_mat(21:40,21:40,:) = zham_mat(1:20,1:20,:)
 
+  zham_mat(2,20+4,:) = zham_mat(2,20+4,:)    + delta_a/3d0*3d0  ! <x;up   |SO| z; down>
+  zham_mat(20+2,4,:) = zham_mat(20+2,4,:)    - delta_a/3d0*3d0  ! <x;down |SO| z; up>
+  zham_mat(3,20+4,:) = zham_mat(3,20+4,:) - zi*delta_a/3d0*3d0  ! <y;up   |SO| z; down>
+  zham_mat(20+3,4,:) = zham_mat(20+3,4,:) - zi*delta_a/3d0*3d0  ! <y;down |SO| z; up>
+  zham_mat(2,3,:)    = zham_mat(2,3,:)    - zi*delta_a/3d0*3d0  ! <x;up   |SO| y; up> !! check
+  zham_mat(2+20,3+20,:) = zham_mat(2+20,3+20,:)+zi*delta_a/3d0*3d0 ! <x;down   |SO| y; down> !! check
+
+  zham_mat(20+4,2,:) = conjg(zham_mat(2,20+4,:))            ! <z; down|SO| x;up>
+  zham_mat(4,20+2,:) = conjg(zham_mat(20+2,4,:))            ! <z; up  |SO| x;down>
+  zham_mat(20+4,3,:) = conjg(zham_mat(3,20+4,:))            ! <z; down|SO| y;up>
+  zham_mat(4,20+3,:) = conjg(zham_mat(20+3,4,:))            ! <z; up  |SO| y;down>
+  zham_mat(3,2,:)    = conjg(zham_mat(2,3,:))               ! <y; up  |SO| x;up> !! check
+  zham_mat(3+20,2+20,:) = conjg(zham_mat(2+20,3+20,:))      ! <y; down|SO| x;down> !! check
+
+
+  zham_mat(12,20+14,:) = zham_mat(12,20+14,:) +delta_c/3d0*3d0     ! <x;up   |SO| z; down>
+  zham_mat(20+12,14,:) = zham_mat(20+12,14,:) -delta_c/3d0*3d0     ! <x;down |SO| z; up>
+  zham_mat(13,20+14,:) = zham_mat(13,20+14,:) -zi*delta_c/3d0*3d0  ! <y;up   |SO| z; down>
+  zham_mat(20+13,14,:) = zham_mat(20+13,14,:) -zi*delta_c/3d0*3d0  ! <y;down |SO| z; up>
+  zham_mat(12,13,:)    = zham_mat(12,13,:)    - zi*delta_c/3d0*3d0  ! <x;up   |SO| y; up> !! check
+  zham_mat(12+20,13+20,:) = zham_mat(12+20,13+20,:)+zi*delta_c/3d0*3d0 ! <x;down   |SO| y; down> !! check
+
+  zham_mat(20+14,12,:) = conjg(zham_mat(12,20+14,:))           ! <z; down |SO| x;up>
+  zham_mat(14,20+12,:) = conjg(zham_mat(20+12,14,:))           ! <z; up |SO| x;down>
+  zham_mat(20+14,13,:) = conjg(zham_mat(13,20+14,:))           ! <z; down|SO| y;up>
+  zham_mat(14,20+13,:) = conjg(zham_mat(20+13,14,:))           ! <z; up |SO| y;down>
+  zham_mat(13,12,:)    = conjg(zham_mat(12,13,:))               ! <y; up  |SO| x;up> !! check
+  zham_mat(13+20,12+20,:) = conjg(zham_mat(12+20,13+20,:))      ! <y; down|SO| x;down> !! check
+
 end subroutine calc_zham_mat
