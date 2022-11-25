@@ -10,6 +10,8 @@ program main
   call initialize_electronic_system
 !  call calc_bandstructure_zincblende
 
+  call electron_dynamics_calculation
+
   call fin_inputoutput
   call fin_parallel
 

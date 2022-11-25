@@ -9,7 +9,8 @@ module electronic_system
   private
 
   public :: initialize_electronic_system, &
-            calc_bandstructure_zincblende
+            calc_bandstructure_zincblende, &
+            set_equilibrium_density_matrix
 
 ! material class
   integer,parameter :: n_diamond = 0, n_zincblende = 1
@@ -23,7 +24,7 @@ module electronic_system
   integer :: nk1, nk2, nk3
   integer :: nk_s, nk_e
   real(8),allocatable :: kvec0(:,:),kvec(:,:)
-  complex(8),allocatable :: zpsi(:,:)
+  complex(8),allocatable :: zpsi(:,:),zrho_dm(:,:,:)
   complex(8),allocatable :: zHam_mat(:,:,:)
 
   integer :: num_nearest_neighbor
@@ -644,6 +645,49 @@ subroutine calc_bandstructure_zincblende
 
 end subroutine calc_bandstructure_zincblende
 !----------------------------------------------------------------------------
+subroutine set_equilibrium_density_matrix
+  implicit none
+  integer :: ik
+  complex(8),allocatable :: zAmat_tmp(:,:)
+!LAPACK
+  integer :: ndim
+  integer :: lwork
+  complex(8),allocatable :: work_lp(:)
+  real(8),allocatable :: rwork(:),w(:)
+  integer :: info
+
+  ndim = 40
+  lwork = 4*ndim**2+4*ndim+256
+  allocate(work_lp(lwork),rwork(3*ndim-2),w(ndim))
+
+
+!LAPACK
+
+
+  allocate(zAmat_tmp(nband,nband))
+
+  if(.not. allocated(zrho_dm))then
+    allocate(zrho_dm(nband,nband,nk_s:nk_e))
+  end if
+
+  kvec = kvec0
+  call calc_two_center_integral
+  call calc_zham_mat
+
+  zrho_dm = 0d0
+  do ik = nk_s, nk_e
+    call zheev('V', 'U', ndim, zham_mat(1:ndim,1:ndim,ik), ndim, w, work_lp, lwork, rwork, info)
+
+    zrho_dm(1,1,ik)=1d0; zrho_dm(2,2,ik)=1d0; zrho_dm(3,3,ik)=1d0; zrho_dm(4,4,ik)=1d0
+    zrho_dm(5,5,ik)=1d0; zrho_dm(6,6,ik)=1d0; zrho_dm(7,7,ik)=1d0; zrho_dm(8,8,ik)=1d0
+
+    zAmat_tmp = matmul(matmul(zham_mat(:,:,ik),zrho_dm(:,:,ik)), &
+                       conjg(transpose(zham_mat(:,:,ik))))
+    zrho_dm(:,:,ik) = zAmat_tmp
+
+  end do
+
+end subroutine set_equilibrium_density_matrix
 !----------------------------------------------------------------------------
 !----------------------------------------------------------------------------
 !----------------------------------------------------------------------------
