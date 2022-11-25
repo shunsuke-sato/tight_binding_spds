@@ -12,6 +12,7 @@
 
 # Executable files
 tbmodel
+tb_model
 
 # Libraries
 *.lib

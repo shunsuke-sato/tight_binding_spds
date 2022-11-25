@@ -1,16 +1,16 @@
 program main
-  use global_variables
+  use parallel
+  use inputoutput
+  use electronic_system
   implicit none
 
   call init_parallel
-  call init_input
+  call init_inputoutput
 
-  call input
-  call initialize
-
+  call initialize_electronic_system
   call calc_bandstructure_zincblende
 
-  call fin_input
+  call fin_inputoutput
   call fin_parallel
 
 end program main
