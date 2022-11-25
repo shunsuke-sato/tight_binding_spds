@@ -9,11 +9,13 @@ LN = -llapack -lblas
 #LN = 
 
 VPATH = src:object
-SRC = $(shell cd src ;ls *.f90 ;cd ..)
-OBJ = $(SRC:.f90=.o)
-OBJ_dir = $(addprefix object/,$(OBJ))
+#SRC = $(shell cd src ;ls *.f90 ;cd ..)
+#OBJ = $(SRC:.f90=.o)
+#OBJ_dir = $(addprefix object/,$(OBJ))
+
 
 PROG = tb_model
+OBJ = object/math.o object/parallel.o object/communication.o object/constants.o object/inputoutput.o object/electronic_system.o object/main.o
 
 $(PROG):math.o \
         parallel.o \
@@ -21,14 +23,29 @@ $(PROG):math.o \
         constants.o \
         inputoutput.o \
         electronic_system.o \
-        main.o $(OBJ)
-	$(FC) -o $(PROG) $(OBJ_dir) $(LN)
+        main.o
+	$(FC) -o $(PROG) $(OBJ) $(LN)
 
-main.o:main.f90
-	$(FC) -c $< $(LN);mv $@  object 
-%.o:%.f90
+math.o:math.f90
 	$(FC) -c $< $(LN);mv $@  object 
 
+parallel.o:parallel.f90
+	$(FC) -c $< $(LN);mv $@  object 
+
+constants.o:constants.f90
+	$(FC) -c $< $(LN);mv $@  object 
+
+communication.o:communication.f90 parallel.o
+	$(FC) -c $< $(LN);mv $@  object 
+
+inputoutput.o:inputoutput.f90 parallel.o communication.o
+	$(FC) -c $< $(LN);mv $@  object 
+
+electronic_system.o:electronic_system.f90 parallel.o communication.o math.o constants.o inputoutput.o
+	$(FC) -c $< $(LN);mv $@  object 
+
+main.o:main.f90 parallel.o inputoutput.o electronic_system.o
+	$(FC) -c $< $(LN);mv $@  object 
 
 clean:
 	rm  -f  object/*.o  *.mod ${PROG}

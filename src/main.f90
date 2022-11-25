@@ -8,7 +8,7 @@ program main
   call init_inputoutput
 
   call initialize_electronic_system
-  call calc_bandstructure_zincblende
+!  call calc_bandstructure_zincblende
 
   call fin_inputoutput
   call fin_parallel
