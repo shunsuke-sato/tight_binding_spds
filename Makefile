@@ -13,14 +13,14 @@ SRC = $(shell cd src ;ls *.f90 ;cd ..)
 OBJ = $(SRC:.f90=.o)
 OBJ_dir = $(addprefix object/,$(OBJ))
 
-PROG = tbmodel
+PROG = tb_model
 
 $(PROG):math.o \
         parallel.o \
         communication.o \
         constants.o \
-        io_mod.o \
-        global_variables.o \
+        inputoutput.o \
+        electronic_system.o \
         main.o $(OBJ)
 	$(FC) -o $(PROG) $(OBJ_dir) $(LN)
 
