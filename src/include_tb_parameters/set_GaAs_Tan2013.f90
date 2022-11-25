@@ -43,3 +43,8 @@
 
   delta_a  = 0.1259d0*energy_unit_tb
   delta_c  = 0.1235d0*energy_unit_tb
+
+! note: the values should be renormalized so as to reproduce the original paper results.
+! Most probably, there were some typos in their definision
+  delta_a = 3d0*delta_a
+  delta_c = 3d0*delta_c
