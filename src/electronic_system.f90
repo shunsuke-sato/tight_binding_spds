@@ -10,7 +10,8 @@ module electronic_system
 
   public :: initialize_electronic_system, &
             calc_bandstructure_zincblende, &
-            set_equilibrium_density_matrix
+            set_equilibrium_density_matrix, &
+            dt_evolve_elec_system
 
 ! material class
   integer,parameter :: n_diamond = 0, n_zincblende = 1
@@ -70,6 +71,9 @@ module electronic_system
   real(8),allocatable :: E2c_int(:,:,:)
 
 
+! relaxation
+  real(8) :: T1_relax, T2_relax
+
 contains
 !----------------------------------------------------------------------------
 subroutine initialize_electronic_system
@@ -77,6 +81,7 @@ subroutine initialize_electronic_system
   real(8) :: vec_t(3)
   integer :: nk_average, nk_remainder
   integer :: ik1,ik2,ik3,ik
+  real(8) :: T1_relax_fs, T2_relax_fs
 
   nband = 2*2*(1+3+5+1) ! 40 bands
   lattice_const = 5.4635d0*angstrom
@@ -142,7 +147,7 @@ subroutine initialize_electronic_system
   lattice_vec = 0.5d0*lattice_const*lattice_vec
   vec_t = cross_product(lattice_vec(:,2),lattice_vec(:,3))
   volume = sum(lattice_vec(:,1)*vec_t(:))
-  write(*,*)"volume=",volume
+!  write(*,*)"volume=",volume
 
   reciprocal_lattice_vec(:,1)=2d0*pi/volume*cross_product(lattice_vec(:,2),lattice_vec(:,3))
   reciprocal_lattice_vec(:,2)=2d0*pi/volume*cross_product(lattice_vec(:,3),lattice_vec(:,1))
@@ -175,6 +180,12 @@ subroutine initialize_electronic_system
   end do
   kvec = kvec0
 
+
+  call read_basic_input('T1_relax_fs',T1_relax_fs,val_default = -1d0)
+  call read_basic_input('T2_relax_fs',T2_relax_fs,val_default = -1d0)
+  T1_relax = T1_relax_fs*fs
+  T2_relax = T2_relax_fs*fs
+
 contains
   function cross_product(vec1, vec2)
     real(8) :: cross_product(3)
@@ -200,7 +211,7 @@ subroutine calc_two_center_integral
     m = Rvec_ac(2,i)/sqrt(sum(Rvec_ac(:,i)**2))
     n = Rvec_ac(3,i)/sqrt(sum(Rvec_ac(:,i)**2))
 
-    write(*,*)l,m,n
+!    write(*,*)l,m,n
 
 ! anion s-orbital
     E2c_int(1,1,i) = ss_sigma !ss
@@ -396,7 +407,7 @@ subroutine calc_zham_mat
 
 
   zham_mat = 0d0
-  do ik = 1, nkpoint
+  do ik = nk_s, nk_e
 
     zham_mat( 1, 1,ik)=Ea_s
     zham_mat( 2, 2,ik)=Ea_p
@@ -688,6 +699,72 @@ subroutine set_equilibrium_density_matrix
   end do
 
 end subroutine set_equilibrium_density_matrix
+!----------------------------------------------------------------------------
+subroutine dt_evolve_elec_system(Act_in,dt_in)
+  implicit none
+  real(8),intent(in) :: Act_in(3), dt_in
+  integer :: ik, ib, ib1,ib2
+  complex(8),allocatable :: zAmat_tmp(:,:),zBmat_tmp(:,:)
+  real(8),allocatable :: ref_pop(:)
+!LAPACK
+  integer :: ndim
+  integer :: lwork
+  complex(8),allocatable :: work_lp(:)
+  real(8),allocatable :: rwork(:),w(:)
+  integer :: info
+
+  ndim = 40
+  lwork = 4*ndim**2+4*ndim+256
+  allocate(work_lp(lwork),rwork(3*ndim-2),w(ndim))
+
+
+!LAPACK
+
+
+  do ik = nk_s, nk_e
+    kvec(:,ik) = kvec0(:,ik) + Act_in(:)
+  end do
+  allocate(zAmat_tmp(nband,nband),zBmat_tmp(nband,nband))
+  allocate(ref_pop(nband))
+  ref_pop(1:8) = 1d0; ref_pop(9:nband) = 0d0
+
+  call calc_two_center_integral
+  call calc_zham_mat
+
+  do ik = nk_s, nk_e
+    call zheev('V', 'U', ndim, zham_mat(1:ndim,1:ndim,ik), ndim, w, work_lp, lwork, rwork, info)
+    zAmat_tmp = matmul( &
+        matmul(conjg(transpose(zham_mat(:,:,ik))),zrho_dm(:,:,ik)) &
+        ,zham_mat(:,:,ik))
+
+    do ib = 1, nband
+      zAmat_tmp(ib,ib)=zAmat_tmp(ib,ib)-ref_pop(ib)
+    end do
+    
+    do ib1 = 1, nband
+      zBmat_tmp(ib1,ib1) = exp(-dt_in/T1_relax)
+      do ib2 = ib1+1,nband
+        zBmat_tmp(ib1,ib2) = exp(-zi*(w(ib1)-w(ib2))*dt_in -dt_in/T2_relax)
+        zBmat_tmp(ib2,ib1) = exp(-zi*(w(ib2)-w(ib1))*dt_in -dt_in/T2_relax)
+      end do
+    end do
+
+    zAmat_tmp = zAmat_tmp*zBmat_tmp 
+    do ib = 1, nband
+      zAmat_tmp(ib,ib)=zAmat_tmp(ib,ib)+ref_pop(ib)
+    end do
+
+    zrho_dm(:,:,ik) = matmul( &
+        matmul(zham_mat(:,:,ik),zAmat_tmp) &
+        ,conjg(transpose(zham_mat(:,:,ik))))
+
+
+  end do
+
+end subroutine dt_evolve_elec_system
+!----------------------------------------------------------------------------
+!----------------------------------------------------------------------------
+!----------------------------------------------------------------------------
 !----------------------------------------------------------------------------
 !----------------------------------------------------------------------------
 !----------------------------------------------------------------------------
