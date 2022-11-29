@@ -23,15 +23,34 @@ contains
   subroutine electron_dynamics_calculation
     implicit  none
     integer :: it
-
+    real(8) :: jt_t(3), Act_t(3)
 
     call input_parameter_for_time_propagation
     call initialize_electron_dynamics
 
+
+
+    call calc_vector_potential_time(tt(0), Act_t)
+    call calc_current(Act_t, jt_t)
+
+    if(if_root_global)then
+      open(40,file="act_jt.out")
+      write(40,"(A)")"# tt (a.u.), Act(1:3) (a.u.), jt(1:3) (a.u.)"
+      write(40,"(999e26.16e3)")tt(0),Act_t, jt_t
+    end if
+
     do it = 1, n_time_step
       if(if_root_global)write(*,*)'it=',it
       call dt_evolve(it)
+
+      call calc_vector_potential_time(tt(it), Act_t)
+      call calc_current(Act_t, jt_t)
+      if(if_root_global)then
+        write(40,"(999e26.16e3)")tt(it),Act_t, jt_t
+      end if
     end do
+
+    if(if_root_global)close(40)
 
   end subroutine electron_dynamics_calculation
 !----------------------------------------------------------------------------------------

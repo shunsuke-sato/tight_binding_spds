@@ -11,7 +11,8 @@ module electronic_system
   public :: initialize_electronic_system, &
             calc_bandstructure_zincblende, &
             set_equilibrium_density_matrix, &
-            dt_evolve_elec_system
+            dt_evolve_elec_system, &
+            calc_current
 
 ! material class
   integer,parameter :: n_diamond = 0, n_zincblende = 1
@@ -27,6 +28,7 @@ module electronic_system
   real(8),allocatable :: kvec0(:,:),kvec(:,:)
   complex(8),allocatable :: zpsi(:,:),zrho_dm(:,:,:)
   complex(8),allocatable :: zHam_mat(:,:,:)
+  complex(8),allocatable :: zJ_mat(:,:,:,:)
 
   integer :: num_nearest_neighbor
   real(8),allocatable :: Rvec_ac(:,:) !! vector from anion to cation
@@ -106,6 +108,7 @@ subroutine initialize_electronic_system
 
   allocate(kvec0(3,nkpoint),kvec(3,nkpoint))
   allocate(zpsi(nband,nk_s:nk_e), zHam_mat(nband,nband,nk_s:nk_e))
+  allocate(zJ_mat(nband,nband,3,nk_s:nk_e))
 
 ! nband = 1-20
 !! anion spin-up
@@ -482,6 +485,83 @@ subroutine calc_zham_mat
   zham_mat(13+20,12+20,:) = conjg(zham_mat(12+20,13+20,:))      ! <y; down|SO| x;down> !! check
 
 end subroutine calc_zham_mat
+!----------------------------------------------------------------------------
+subroutine calc_zJ_mat
+  implicit none
+  integer :: ik,i,ia,ic
+  complex(8) :: zphase
+
+  zJ_mat = 0d0
+
+  do ik = nk_s, nk_e
+
+    do ia = 1, 10
+      do ic = 1, 10
+        do i = 1, num_nearest_neighbor
+          zphase=exp(zi*sum(kvec(:,ik)*Rvec_ac(:,i)))
+          zJ_mat(ia,10+ic,1,ik)=zJ_mat(ia,10+ic,1,ik) &
+              + E2c_int(ia,ic,i)*zphase*zi*Rvec_ac(1,i)
+
+          zJ_mat(ia,10+ic,2,ik)=zJ_mat(ia,10+ic,2,ik) &
+              + E2c_int(ia,ic,i)*zphase*zi*Rvec_ac(2,i)
+
+          zJ_mat(ia,10+ic,3,ik)=zJ_mat(ia,10+ic,3,ik) &
+              + E2c_int(ia,ic,i)*zphase*zi*Rvec_ac(3,i)
+
+        end do
+      end do
+    end do
+
+    do ia = 1, 10
+      do ic = 1, 10
+        zJ_mat(10+ic,ia,:,ik)=conjg(zJ_mat(ia,10+ic,:,ik))
+      end do
+    end do
+
+  end do
+
+  zJ_mat(21:40,21:40,:,:) = zJ_mat(1:20,1:20,:,:)
+
+end subroutine calc_zJ_mat
+!----------------------------------------------------------------------------
+subroutine calc_current(Act_t, jt_t)
+  implicit none
+  real(8),intent(in) :: Act_t(3)
+  real(8),intent(out) :: jt_t(3)
+  real(8),allocatable :: Amat_tmp(:,:,:)
+  integer :: ik, ib
+
+  jt_t = 0d0
+  
+
+  do ik = nk_s, nk_e
+    kvec(:,ik) = kvec0(:,ik) + Act_t(:)
+  end do
+
+  call calc_two_center_integral
+  call calc_zJ_mat
+
+
+  allocate(Amat_tmp(nband,nband,3))
+  do ik = nk_s, nk_e
+
+    Amat_tmp(:,:,1) = matmul(zJ_mat(:,:,1,ik),zrho_dm(:,:,ik))
+    Amat_tmp(:,:,2) = matmul(zJ_mat(:,:,2,ik),zrho_dm(:,:,ik))
+    Amat_tmp(:,:,3) = matmul(zJ_mat(:,:,3,ik),zrho_dm(:,:,ik))
+
+    do ib = 1, nband
+      jt_t(1) = jt_t(1) + Amat_tmp(ib,ib,1)
+      jt_t(2) = jt_t(2) + Amat_tmp(ib,ib,2)
+      jt_t(3) = jt_t(3) + Amat_tmp(ib,ib,3)
+    end do
+
+  end do
+
+  call comm_allreduce(jt_t)
+  jt_t = jt_t/nkpoint
+
+
+end subroutine calc_current
 !----------------------------------------------------------------------------
 subroutine calc_bandstructure_zincblende
   implicit none

@@ -60,7 +60,6 @@ module laser
       if_pulse_1 = .true.
       if(abs(E0_pulse_1_x) + abs(E0_pulse_1_y) + abs(E0_pulse_1_z) == 0) if_pulse_1 = .false.
 
-      
     end subroutine init_laser
 !-------------------------------------------------------------------------------
     subroutine calc_vector_potential_time(tt, Act)
@@ -73,16 +72,16 @@ module laser
 
 ! laser 1
       if(if_pulse_1)then
-
         xx = tt-pulse_center_1 - time_delay_1
         if(abs(xx)<0.5d0*pulse_width_1)then
+
           Act(1) = Act(1) -(E0_pulse_1_x/omega_1)*sin(omega_1*xx+phi_CEP_1_x) &
             *cos(pi*xx/pulse_width_1)**4
 
-          Act(2) = Act(2) -(E0_pulse_1_y/omega_1)*sin(omega_1*xx+phi_CEP_1_x) &
+          Act(2) = Act(2) -(E0_pulse_1_y/omega_1)*sin(omega_1*xx+phi_CEP_1_y) &
             *cos(pi*xx/pulse_width_1)**4
 
-          Act(3) = Act(3) -(E0_pulse_1_z/omega_1)*sin(omega_1*xx+phi_CEP_1_x) &
+          Act(3) = Act(3) -(E0_pulse_1_z/omega_1)*sin(omega_1*xx+phi_CEP_1_z) &
             *cos(pi*xx/pulse_width_1)**4
 
         end if
