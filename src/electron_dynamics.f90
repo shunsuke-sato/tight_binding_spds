@@ -6,6 +6,7 @@ module electron_dynamics
   use constants
   use inputoutput
   use electronic_system
+  use laser
   implicit none
   private
 
@@ -27,7 +28,6 @@ contains
     call input_parameter_for_time_propagation
     call initialize_electron_dynamics
 
-
     do it = 1, n_time_step
       if(if_root_global)write(*,*)'it=',it
       call dt_evolve(it)
@@ -39,7 +39,7 @@ contains
     implicit none
 
     call set_equilibrium_density_matrix
-    
+    call init_laser    
 
   end subroutine initialize_electron_dynamics
 !----------------------------------------------------------------------------------------
@@ -79,14 +79,14 @@ contains
     
 !! === Start: propagation from tt(it-1) to tt(it-1)+dt/2 ===
     ttt = tt(it-1)
-!    call calc_Act_field(Act,ttt)
+    call calc_vector_potential_time(ttt, Act)
 
     call dt_evolve_elec_system(Act,dt*0.5d0)
 !! === End: propagation from tt(it-1) to tt(it-1)+dt/2 ===
 
 !! === Start: propagation from tt(it-1)+dt/2 to tt(it) ===
     ttt = tt(it)
-!    call calc_Act_field(Act,ttt)
+    call calc_vector_potential_time(ttt, Act)
 
     call dt_evolve_elec_system(Act,dt*0.5d0)
 !! === End: propagation from tt(it-1)+dt/2 to tt(it) ===

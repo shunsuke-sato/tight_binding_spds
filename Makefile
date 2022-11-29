@@ -15,7 +15,7 @@ VPATH = src:object
 
 
 PROG = tb_model
-OBJ = object/math.o object/parallel.o object/communication.o object/constants.o object/inputoutput.o object/electronic_system.o object/electron_dynamics.o object/main.o
+OBJ = object/math.o object/parallel.o object/communication.o object/constants.o object/inputoutput.o object/electronic_system.o object/laser.o object/electron_dynamics.o object/main.o
 
 $(PROG):math.o \
         parallel.o \
@@ -23,6 +23,7 @@ $(PROG):math.o \
         constants.o \
         inputoutput.o \
         electronic_system.o \
+        laser.o \
         electron_dynamics.o \
         main.o
 	$(FC) -o $(PROG) $(OBJ) $(LN)
@@ -45,7 +46,10 @@ inputoutput.o:inputoutput.f90 parallel.o communication.o
 electronic_system.o:electronic_system.f90 parallel.o communication.o math.o constants.o inputoutput.o
 	$(FC) -c $< $(LN);mv $@  object 
 
-electron_dynamics.o:electron_dynamics.f90 electronic_system.o parallel.o communication.o math.o constants.o inputoutput.o
+laser.o:laser.f90 parallel.o communication.o math.o constants.o inputoutput.o
+	$(FC) -c $< $(LN);mv $@  object 
+
+electron_dynamics.o:electron_dynamics.f90 electronic_system.o parallel.o communication.o math.o constants.o inputoutput.o laser.o
 	$(FC) -c $< $(LN);mv $@  object 
 
 main.o:main.f90 parallel.o inputoutput.o electronic_system.o electron_dynamics.o 
