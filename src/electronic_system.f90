@@ -149,7 +149,7 @@ subroutine initialize_electronic_system
   
   lattice_vec = 0.5d0*lattice_const*lattice_vec
   vec_t = cross_product(lattice_vec(:,2),lattice_vec(:,3))
-  volume = sum(lattice_vec(:,1)*vec_t(:))
+  volume = abs(sum(lattice_vec(:,1)*vec_t(:)))
 !  write(*,*)"volume=",volume
 
   reciprocal_lattice_vec(:,1)=2d0*pi/volume*cross_product(lattice_vec(:,2),lattice_vec(:,3))
@@ -558,7 +558,7 @@ subroutine calc_current(Act_t, jt_t)
   end do
 
   call comm_allreduce(jt_t)
-  jt_t = jt_t/nkpoint
+  jt_t = jt_t/(nkpoint*volume)
 
 
 end subroutine calc_current
