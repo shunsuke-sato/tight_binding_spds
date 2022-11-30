@@ -1,0 +1,20 @@
+nk1 = 2
+nk2 = 2
+nk3 = 2
+
+time_propagation_fs = 100d0
+dt = 1d0
+
+T1_relax_fs = 3d3
+T2_relax_fs = 20d0
+
+
+E0_pulse_1_x_Vm = 1d5
+E0_pulse_1_y_Vm = 0d5
+E0_pulse_1_z_Vm = 0d5
+
+omega_1_ev = 1.55d0
+pulse_width_1_fs = 100d0
+
+
+
