@@ -12,7 +12,8 @@ module electronic_system
             calc_bandstructure_zincblende, &
             set_equilibrium_density_matrix, &
             dt_evolve_elec_system, &
-            calc_current
+            calc_current, &
+            calc_num_electron
 
 ! material class
   integer,parameter :: n_diamond = 0, n_zincblende = 1
@@ -843,6 +844,23 @@ subroutine dt_evolve_elec_system(Act_in,dt_in)
 
 end subroutine dt_evolve_elec_system
 !----------------------------------------------------------------------------
+subroutine calc_num_electron(num_elec)
+  implicit none
+  real(8),intent(out) :: num_elec
+  integer :: ik, ib
+
+
+  num_elec = 0d0
+  do ik = nk_s, nk_e
+    do ib = 1, nband
+      num_elec = num_elec + zrho_dm(ib,ib,ik)
+    end do
+  end do
+
+  call comm_allreduce(num_elec)
+  num_elec = num_elec/(nkpoint)
+  
+end subroutine calc_num_electron
 !----------------------------------------------------------------------------
 !----------------------------------------------------------------------------
 !----------------------------------------------------------------------------
