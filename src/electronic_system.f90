@@ -889,7 +889,7 @@ subroutine prepare_sampling_for_focal_spot_average
   real(8) :: x1,x2,x3,alpha
 
   ik = 0
-  do isample = num_sample_focal_spot_average
+  do isample = 1, num_sample_focal_spot_average
 
     call vdCorput_sequence(isample,2,x1)
     call vdCorput_sequence(isample,3,x2)
