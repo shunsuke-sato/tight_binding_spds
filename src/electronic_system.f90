@@ -105,7 +105,7 @@ subroutine initialize_electronic_system
   call read_basic_input('num_sample_focal_spot_average',num_sample_focal_spot_average,val_default = -1)
 
   if(if_focal_spot_average)then
-    nkpoint = 2*num_sample_focal_spot_average
+    nkpoint = 8*num_sample_focal_spot_average
   end if
 
 
@@ -896,6 +896,7 @@ subroutine prepare_sampling_for_focal_spot_average
     call vdCorput_sequence(isample,5,x3)
     call vdCorput_sequence(isample,7,alpha)
 
+!= +++
     ik = ik + 1
 
     kvec0(:,ik) = x1*reciprocal_lattice_vec(:,1) &
@@ -903,13 +904,63 @@ subroutine prepare_sampling_for_focal_spot_average
                  +x3*reciprocal_lattice_vec(:,3)
     alpha_fsa(ik) = alpha
 
+!= -++
+    ik = ik + 1
+
+    kvec0(:,ik) =-x1*reciprocal_lattice_vec(:,1) &
+                 +x2*reciprocal_lattice_vec(:,2) &
+                 +x3*reciprocal_lattice_vec(:,3)
+    alpha_fsa(ik) = alpha
+
+!= +-+
+    ik = ik + 1
+
+    kvec0(:,ik) = x1*reciprocal_lattice_vec(:,1) &
+                 -x2*reciprocal_lattice_vec(:,2) &
+                 +x3*reciprocal_lattice_vec(:,3)
+    alpha_fsa(ik) = alpha
+
+!= ++-
+    ik = ik + 1
+
+    kvec0(:,ik) = x1*reciprocal_lattice_vec(:,1) &
+                 +x2*reciprocal_lattice_vec(:,2) &
+                 -x3*reciprocal_lattice_vec(:,3)
+    alpha_fsa(ik) = alpha
+
+!= --+
+    ik = ik + 1
+
+    kvec0(:,ik) =-x1*reciprocal_lattice_vec(:,1) &
+                 -x2*reciprocal_lattice_vec(:,2) &
+                 +x3*reciprocal_lattice_vec(:,3)
+    alpha_fsa(ik) = alpha
+
+!= +--
+    ik = ik + 1
+
+    kvec0(:,ik) = x1*reciprocal_lattice_vec(:,1) &
+                 -x2*reciprocal_lattice_vec(:,2) &
+                 -x3*reciprocal_lattice_vec(:,3)
+    alpha_fsa(ik) = alpha
+
+!= -+-
+    ik = ik + 1
+
+    kvec0(:,ik) =-x1*reciprocal_lattice_vec(:,1) &
+                 +x2*reciprocal_lattice_vec(:,2) &
+                 -x3*reciprocal_lattice_vec(:,3)
+    alpha_fsa(ik) = alpha
+
+!= ---
     ik = ik + 1
 
     kvec0(:,ik) =-x1*reciprocal_lattice_vec(:,1) &
                  -x2*reciprocal_lattice_vec(:,2) &
                  -x3*reciprocal_lattice_vec(:,3)
     alpha_fsa(ik) = alpha
-    
+
+
   end do
 
 end subroutine prepare_sampling_for_focal_spot_average
