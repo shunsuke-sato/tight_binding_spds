@@ -77,6 +77,11 @@ module electronic_system
 ! relaxation
   real(8) :: T1_relax, T2_relax
 
+! focal spot average
+  logical :: if_focal_spot_average 
+  integer :: num_sample_focal_spot_average
+  real(8),allocatable :: alpha_fsa(:)
+
 contains
 !----------------------------------------------------------------------------
 subroutine initialize_electronic_system
@@ -96,6 +101,16 @@ subroutine initialize_electronic_system
 
   nkpoint = nk1*nk2*nk3
 
+  call read_basic_input('if_focal_spot_average',if_focal_spot_average,val_default = .false.)
+  call read_basic_input('num_sample_focal_spot_average',num_sample_focal_spot_average,val_default = -1)
+
+  if(if_focal_spot_average)then
+    nkpoint = 2*num_sample_focal_spot_average
+  end if
+
+
+
+
   nk_average = nkpoint/comm_nproc_global
   nk_remainder = mod(nkpoint,comm_nproc_global)
   if(comm_id_global+1 <= nk_remainder)then
@@ -107,7 +122,7 @@ subroutine initialize_electronic_system
   end if
 
 
-  allocate(kvec0(3,nkpoint),kvec(3,nkpoint))
+  allocate(kvec0(3,nkpoint),kvec(3,nkpoint),alpha_fsa(nkpoint))
   allocate(zpsi(nband,nk_s:nk_e), zHam_mat(nband,nband,nk_s:nk_e))
   allocate(zJ_mat(nband,nband,3,nk_s:nk_e))
 
@@ -170,19 +185,24 @@ subroutine initialize_electronic_system
 !  include "include_tb_parameters/set_GaAs_Jancu1998.f90"
   include "include_tb_parameters/set_GaAs_Tan2013.f90"
 
-  kvec0 = 0d0; kvec=0d0
-  ik = 0
-  do ik1 = 1, nk1
-    do ik2 = 1, nk2
-      do ik3 = 1, nk3
-        ik = ik + 1
-        kvec0(:,ik) = (ik1-1)/dble(nk1)*reciprocal_lattice_vec(:,1) &
-                     +(ik2-1)/dble(nk2)*reciprocal_lattice_vec(:,2) &
-                     +(ik3-1)/dble(nk3)*reciprocal_lattice_vec(:,3) 
+  if(if_focal_spot_average)then
+    call prepare_sampling_for_focal_spot_average
+  else ! uniform sampling
+    alpha_fsa = 1d0
+    kvec0 = 0d0; kvec=0d0
+    ik = 0
+    do ik1 = 1, nk1
+      do ik2 = 1, nk2
+        do ik3 = 1, nk3
+          ik = ik + 1
+          kvec0(:,ik) = (ik1-1)/dble(nk1)*reciprocal_lattice_vec(:,1) &
+              +(ik2-1)/dble(nk2)*reciprocal_lattice_vec(:,2) &
+              +(ik3-1)/dble(nk3)*reciprocal_lattice_vec(:,3) 
+        end do
       end do
     end do
-  end do
-  kvec = kvec0
+    kvec = kvec0
+  end if
 
 
   call read_basic_input('T1_relax_fs',T1_relax_fs,val_default = -1d0)
@@ -536,7 +556,7 @@ subroutine calc_current(Act_t, jt_t)
   
 
   do ik = nk_s, nk_e
-    kvec(:,ik) = kvec0(:,ik) + Act_t(:)
+    kvec(:,ik) = kvec0(:,ik) + alpha_fsa(ik)*Act_t(:)
   end do
 
   call calc_two_center_integral
@@ -551,9 +571,9 @@ subroutine calc_current(Act_t, jt_t)
     Amat_tmp(:,:,3) = matmul(zJ_mat(:,:,3,ik),zrho_dm(:,:,ik))
 
     do ib = 1, nband
-      jt_t(1) = jt_t(1) + Amat_tmp(ib,ib,1)
-      jt_t(2) = jt_t(2) + Amat_tmp(ib,ib,2)
-      jt_t(3) = jt_t(3) + Amat_tmp(ib,ib,3)
+      jt_t(1) = jt_t(1) + Amat_tmp(ib,ib,1)/alpha_fsa(ik)
+      jt_t(2) = jt_t(2) + Amat_tmp(ib,ib,2)/alpha_fsa(ik)
+      jt_t(3) = jt_t(3) + Amat_tmp(ib,ib,3)/alpha_fsa(ik)
     end do
 
   end do
@@ -803,7 +823,7 @@ subroutine dt_evolve_elec_system(Act_in,dt_in)
 
 
   do ik = nk_s, nk_e
-    kvec(:,ik) = kvec0(:,ik) + Act_in(:)
+    kvec(:,ik) = kvec0(:,ik) + alpha_fsa(ik)*Act_in(:)
   end do
   allocate(zAmat_tmp(nband,nband),zBmat_tmp(nband,nband))
   allocate(ref_pop(nband))
@@ -862,6 +882,37 @@ subroutine calc_num_electron(num_elec)
   
 end subroutine calc_num_electron
 !----------------------------------------------------------------------------
+subroutine prepare_sampling_for_focal_spot_average
+  implicit none
+  integer :: isample
+  integer :: ik
+  real(8) :: x1,x2,x3,alpha
+
+  ik = 0
+  do isample = num_sample_focal_spot_average
+
+    call vdCorput_sequence(isample,2,x1)
+    call vdCorput_sequence(isample,3,x2)
+    call vdCorput_sequence(isample,5,x3)
+    call vdCorput_sequence(isample,7,alpha)
+
+    ik = ik + 1
+
+    kvec0(:,ik) = x1*reciprocal_lattice_vec(:,1) &
+                 +x2*reciprocal_lattice_vec(:,2) &
+                 +x3*reciprocal_lattice_vec(:,3)
+    alpha_fsa(ik) = alpha
+
+    ik = ik + 1
+
+    kvec0(:,ik) =-x1*reciprocal_lattice_vec(:,1) &
+                 -x2*reciprocal_lattice_vec(:,2) &
+                 -x3*reciprocal_lattice_vec(:,3)
+    alpha_fsa(ik) = alpha
+    
+  end do
+
+end subroutine prepare_sampling_for_focal_spot_average
 !----------------------------------------------------------------------------
 !----------------------------------------------------------------------------
 !----------------------------------------------------------------------------
