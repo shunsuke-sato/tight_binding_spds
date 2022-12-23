@@ -82,7 +82,6 @@ module electronic_system
   integer :: num_sample_focal_spot_average
   real(8),allocatable :: alpha_fsa(:)
   integer :: npower_focal_spot_average
-  integer,parameter :: nfsa_1=4, nfsa_2=4, nfsa_3=4
 
 contains
 !----------------------------------------------------------------------------
@@ -109,7 +108,7 @@ subroutine initialize_electronic_system
 
 
   if(if_focal_spot_average)then
-    nkpoint = nfsa_1*nfsa_2*nfsa_3*num_sample_focal_spot_average
+    nkpoint = 12*num_sample_focal_spot_average
   end if
 
 
@@ -891,7 +890,6 @@ subroutine prepare_sampling_for_focal_spot_average
   integer :: isample
   integer :: ik
   real(8) :: x1,x2,x3,alpha
-  integer :: ix1, ix2, ix3
 
   ik = 0
   do isample = 1, num_sample_focal_spot_average
@@ -901,20 +899,102 @@ subroutine prepare_sampling_for_focal_spot_average
     call vdCorput_sequence(isample,5,x3)
     call vdCorput_sequence(isample,7,alpha)
 
-    do ix1 = 0, nfsa_1-1
-      do ix2 = 0, nfsa_2-1
-        do ix3 = 0, nfsa_3-1
+! x1,x2,x3,+
+    ik = ik + 1
+    kvec0(:,ik) =( x1)*reciprocal_lattice_vec(:,1) &
+                +( x2)*reciprocal_lattice_vec(:,2) &
+                +( x3)*reciprocal_lattice_vec(:,3) 
 
-          ik = ik + 1
+    alpha_fsa(ik) = alpha
 
-          kvec0(:,ik) = (x1+ix1/dble(nfsa_1))*reciprocal_lattice_vec(:,1) &
-                       +(x2+ix2/dble(nfsa_2))*reciprocal_lattice_vec(:,2) &
-                       +(x3+ix3/dble(nfsa_3))*reciprocal_lattice_vec(:,3) 
+! x1,x2,x3,-
+    ik = ik + 1
+    kvec0(:,ik) =(-x1)*reciprocal_lattice_vec(:,1) &
+                +(-x2)*reciprocal_lattice_vec(:,2) &
+                +(-x3)*reciprocal_lattice_vec(:,3) 
 
-          alpha_fsa(ik) = alpha
-        end do
-      end do
-    end do
+    alpha_fsa(ik) = alpha
+
+! x1,x3,x2,+
+    ik = ik + 1
+    kvec0(:,ik) =( x1)*reciprocal_lattice_vec(:,1) &
+                +( x3)*reciprocal_lattice_vec(:,2) &
+                +( x2)*reciprocal_lattice_vec(:,3) 
+
+    alpha_fsa(ik) = alpha
+
+! x1,x3,x2,-
+    ik = ik + 1
+    kvec0(:,ik) =(-x1)*reciprocal_lattice_vec(:,1) &
+                +(-x3)*reciprocal_lattice_vec(:,2) &
+                +(-x2)*reciprocal_lattice_vec(:,3) 
+
+    alpha_fsa(ik) = alpha
+
+
+! x2,x1,x3,+
+    ik = ik + 1
+    kvec0(:,ik) =( x2)*reciprocal_lattice_vec(:,1) &
+                +( x1)*reciprocal_lattice_vec(:,2) &
+                +( x3)*reciprocal_lattice_vec(:,3) 
+
+    alpha_fsa(ik) = alpha
+
+! x2,x1,x3,-
+    ik = ik + 1
+    kvec0(:,ik) =(-x2)*reciprocal_lattice_vec(:,1) &
+                +(-x1)*reciprocal_lattice_vec(:,2) &
+                +(-x3)*reciprocal_lattice_vec(:,3) 
+
+    alpha_fsa(ik) = alpha
+
+! x2,x3,x1,+
+    ik = ik + 1
+    kvec0(:,ik) =( x2)*reciprocal_lattice_vec(:,1) &
+                +( x3)*reciprocal_lattice_vec(:,2) &
+                +( x1)*reciprocal_lattice_vec(:,3) 
+
+    alpha_fsa(ik) = alpha
+
+! x2,x3,x1,-
+    ik = ik + 1
+    kvec0(:,ik) =(-x2)*reciprocal_lattice_vec(:,1) &
+                +(-x3)*reciprocal_lattice_vec(:,2) &
+                +(-x1)*reciprocal_lattice_vec(:,3) 
+
+    alpha_fsa(ik) = alpha
+
+! x3,x1,x2,+
+    ik = ik + 1
+    kvec0(:,ik) =( x3)*reciprocal_lattice_vec(:,1) &
+                +( x1)*reciprocal_lattice_vec(:,2) &
+                +( x2)*reciprocal_lattice_vec(:,3) 
+
+    alpha_fsa(ik) = alpha
+
+! x3,x1,x2,-
+    ik = ik + 1
+    kvec0(:,ik) =(-x3)*reciprocal_lattice_vec(:,1) &
+                +(-x1)*reciprocal_lattice_vec(:,2) &
+                +(-x2)*reciprocal_lattice_vec(:,3) 
+
+    alpha_fsa(ik) = alpha
+
+! x3,x2,x1,+
+    ik = ik + 1
+    kvec0(:,ik) =( x3)*reciprocal_lattice_vec(:,1) &
+                +( x2)*reciprocal_lattice_vec(:,2) &
+                +( x1)*reciprocal_lattice_vec(:,3) 
+
+    alpha_fsa(ik) = alpha
+
+! x3,x2,x1,-
+    ik = ik + 1
+    kvec0(:,ik) =(-x3)*reciprocal_lattice_vec(:,1) &
+                +(-x2)*reciprocal_lattice_vec(:,2) &
+                +(-x1)*reciprocal_lattice_vec(:,3) 
+
+    alpha_fsa(ik) = alpha
 
 
   end do
