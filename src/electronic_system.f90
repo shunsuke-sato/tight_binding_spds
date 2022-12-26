@@ -894,9 +894,9 @@ subroutine prepare_sampling_for_focal_spot_average
   ik = 0
   do isample = 1, num_sample_focal_spot_average
 
-    call vdCorput_sequence(isample,2,x1); x1 = x1*0.5d0
-    call vdCorput_sequence(isample,3,x2); x2 = x2*0.5d0
-    call vdCorput_sequence(isample,5,x3); x3 = x3*0.5d0
+    call vdCorput_sequence(isample,2,x1); x1 = x1-0.5d0
+    call vdCorput_sequence(isample,3,x2); x2 = x2-0.5d0
+    call vdCorput_sequence(isample,5,x3); x3 = x3-0.5d0
     call vdCorput_sequence(isample,7,alpha)
 
 ! x1,x2,x3,+
