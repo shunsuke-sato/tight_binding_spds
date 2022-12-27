@@ -8,6 +8,8 @@ module parallel
                      comm_id_global, &
                      comm_nproc_global
   logical, public :: if_root_global
+
+  real(8) :: time_start, time_end
                      
 ! OMP
   integer, public :: nthread_omp
@@ -52,11 +54,20 @@ contains
     nthread_omp = 1
 !$  nthread_omp=omp_get_max_threads()
 
+    time_start = MPI_Wtime()
+
   end subroutine init_parallel
 !-------------------------------------------------------------------------------
   subroutine fin_parallel
     implicit none
     integer :: ierr
+
+    time_end = MPI_Wtime()
+    if(if_root_global)then
+      write(*,"(A,2x,e16.6e3)")"Elapsed time (sec.) =",time_end-time_start
+      write(*,"(A,2x,e16.6e3)")"Elapsed time (min.) =",(time_end-time_start)/60d0
+      write(*,"(A,2x,e16.6e3)")"Elapsed time (hour) =",(time_end-time_start)/(60d0*60d0)
+    end if
 
     call MPI_Finalize(ierr)
 
