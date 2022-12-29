@@ -125,7 +125,7 @@ subroutine initialize_electronic_system
   end if
 
 
-  allocate(kvec0(3,nkpoint),kvec(3,nkpoint),alpha_fsa(nkpoint))
+  allocate(kvec0(3,nk_s:nk_e),kvec(3,nk_s:nk_e),alpha_fsa(nk_s:nk_e))
   allocate(zpsi(nband,nk_s:nk_e), zHam_mat(nband,nband,nk_s:nk_e))
   allocate(zJ_mat(nband,nband,3,nk_s:nk_e))
 
@@ -198,9 +198,11 @@ subroutine initialize_electronic_system
       do ik2 = 1, nk2
         do ik3 = 1, nk3
           ik = ik + 1
-          kvec0(:,ik) = (ik1-1)/dble(nk1)*reciprocal_lattice_vec(:,1) &
-              +(ik2-1)/dble(nk2)*reciprocal_lattice_vec(:,2) &
-              +(ik3-1)/dble(nk3)*reciprocal_lattice_vec(:,3) 
+          if(ik >= nk_s .and. ik <= nk_e)then
+            kvec0(:,ik) = (ik1-1)/dble(nk1)*reciprocal_lattice_vec(:,1) &
+                +(ik2-1)/dble(nk2)*reciprocal_lattice_vec(:,2) &
+                +(ik3-1)/dble(nk3)*reciprocal_lattice_vec(:,3) 
+          end if
         end do
       end do
     end do
