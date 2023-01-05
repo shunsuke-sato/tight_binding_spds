@@ -903,100 +903,124 @@ subroutine prepare_sampling_for_focal_spot_average
 
 ! x1,x2,x3,+
     ik = ik + 1
-    kvec0(:,ik) =( x1)*reciprocal_lattice_vec(:,1) &
-                +( x2)*reciprocal_lattice_vec(:,2) &
-                +( x3)*reciprocal_lattice_vec(:,3) 
+    if(ik >= nk_s .and. ik <= nk_e)then
+      kvec0(:,ik) =( x1)*reciprocal_lattice_vec(:,1) &
+                  +( x2)*reciprocal_lattice_vec(:,2) &
+                  +( x3)*reciprocal_lattice_vec(:,3) 
 
-    alpha_fsa(ik) = alpha
+      alpha_fsa(ik) = alpha
+    end if
 
 ! x1,x2,x3,-
     ik = ik + 1
-    kvec0(:,ik) =(-x1)*reciprocal_lattice_vec(:,1) &
-                +(-x2)*reciprocal_lattice_vec(:,2) &
-                +(-x3)*reciprocal_lattice_vec(:,3) 
+    if(ik >= nk_s .and. ik <= nk_e)then
+      kvec0(:,ik) =(-x1)*reciprocal_lattice_vec(:,1) &
+                  +(-x2)*reciprocal_lattice_vec(:,2) &
+                  +(-x3)*reciprocal_lattice_vec(:,3) 
 
-    alpha_fsa(ik) = alpha
+      alpha_fsa(ik) = alpha
+    end if
 
 ! x1,x3,x2,+
     ik = ik + 1
-    kvec0(:,ik) =( x1)*reciprocal_lattice_vec(:,1) &
-                +( x3)*reciprocal_lattice_vec(:,2) &
-                +( x2)*reciprocal_lattice_vec(:,3) 
+    if(ik >= nk_s .and. ik <= nk_e)then
+      kvec0(:,ik) =( x1)*reciprocal_lattice_vec(:,1) &
+                  +( x3)*reciprocal_lattice_vec(:,2) &
+                  +( x2)*reciprocal_lattice_vec(:,3) 
 
-    alpha_fsa(ik) = alpha
+      alpha_fsa(ik) = alpha
+    end if
 
 ! x1,x3,x2,-
     ik = ik + 1
-    kvec0(:,ik) =(-x1)*reciprocal_lattice_vec(:,1) &
-                +(-x3)*reciprocal_lattice_vec(:,2) &
-                +(-x2)*reciprocal_lattice_vec(:,3) 
+    if(ik >= nk_s .and. ik <= nk_e)then
+      kvec0(:,ik) =(-x1)*reciprocal_lattice_vec(:,1) &
+                  +(-x3)*reciprocal_lattice_vec(:,2) &
+                  +(-x2)*reciprocal_lattice_vec(:,3) 
 
-    alpha_fsa(ik) = alpha
+      alpha_fsa(ik) = alpha
+    end if
 
 
 ! x2,x1,x3,+
     ik = ik + 1
-    kvec0(:,ik) =( x2)*reciprocal_lattice_vec(:,1) &
-                +( x1)*reciprocal_lattice_vec(:,2) &
-                +( x3)*reciprocal_lattice_vec(:,3) 
+    if(ik >= nk_s .and. ik <= nk_e)then
+      kvec0(:,ik) =( x2)*reciprocal_lattice_vec(:,1) &
+                  +( x1)*reciprocal_lattice_vec(:,2) &
+                  +( x3)*reciprocal_lattice_vec(:,3) 
 
-    alpha_fsa(ik) = alpha
+      alpha_fsa(ik) = alpha
+    end if
 
 ! x2,x1,x3,-
     ik = ik + 1
-    kvec0(:,ik) =(-x2)*reciprocal_lattice_vec(:,1) &
-                +(-x1)*reciprocal_lattice_vec(:,2) &
-                +(-x3)*reciprocal_lattice_vec(:,3) 
+    if(ik >= nk_s .and. ik <= nk_e)then
+      kvec0(:,ik) =(-x2)*reciprocal_lattice_vec(:,1) &
+                  +(-x1)*reciprocal_lattice_vec(:,2) &
+                  +(-x3)*reciprocal_lattice_vec(:,3) 
 
-    alpha_fsa(ik) = alpha
+      alpha_fsa(ik) = alpha
+    end if
 
 ! x2,x3,x1,+
     ik = ik + 1
-    kvec0(:,ik) =( x2)*reciprocal_lattice_vec(:,1) &
-                +( x3)*reciprocal_lattice_vec(:,2) &
-                +( x1)*reciprocal_lattice_vec(:,3) 
+    if(ik >= nk_s .and. ik <= nk_e)then
+      kvec0(:,ik) =( x2)*reciprocal_lattice_vec(:,1) &
+                  +( x3)*reciprocal_lattice_vec(:,2) &
+                  +( x1)*reciprocal_lattice_vec(:,3) 
 
-    alpha_fsa(ik) = alpha
+      alpha_fsa(ik) = alpha
+    end if
 
 ! x2,x3,x1,-
     ik = ik + 1
-    kvec0(:,ik) =(-x2)*reciprocal_lattice_vec(:,1) &
-                +(-x3)*reciprocal_lattice_vec(:,2) &
-                +(-x1)*reciprocal_lattice_vec(:,3) 
+    if(ik >= nk_s .and. ik <= nk_e)then
+      kvec0(:,ik) =(-x2)*reciprocal_lattice_vec(:,1) &
+                  +(-x3)*reciprocal_lattice_vec(:,2) &
+                  +(-x1)*reciprocal_lattice_vec(:,3) 
 
-    alpha_fsa(ik) = alpha
+      alpha_fsa(ik) = alpha
+    end if
 
 ! x3,x1,x2,+
     ik = ik + 1
-    kvec0(:,ik) =( x3)*reciprocal_lattice_vec(:,1) &
-                +( x1)*reciprocal_lattice_vec(:,2) &
-                +( x2)*reciprocal_lattice_vec(:,3) 
+    if(ik >= nk_s .and. ik <= nk_e)then
+      kvec0(:,ik) =( x3)*reciprocal_lattice_vec(:,1) &
+                  +( x1)*reciprocal_lattice_vec(:,2) &
+                  +( x2)*reciprocal_lattice_vec(:,3) 
 
-    alpha_fsa(ik) = alpha
+      alpha_fsa(ik) = alpha
+    end if
 
 ! x3,x1,x2,-
     ik = ik + 1
-    kvec0(:,ik) =(-x3)*reciprocal_lattice_vec(:,1) &
-                +(-x1)*reciprocal_lattice_vec(:,2) &
-                +(-x2)*reciprocal_lattice_vec(:,3) 
+    if(ik >= nk_s .and. ik <= nk_e)then
+      kvec0(:,ik) =(-x3)*reciprocal_lattice_vec(:,1) &
+                  +(-x1)*reciprocal_lattice_vec(:,2) &
+                  +(-x2)*reciprocal_lattice_vec(:,3) 
 
-    alpha_fsa(ik) = alpha
+      alpha_fsa(ik) = alpha
+    end if
 
 ! x3,x2,x1,+
     ik = ik + 1
-    kvec0(:,ik) =( x3)*reciprocal_lattice_vec(:,1) &
-                +( x2)*reciprocal_lattice_vec(:,2) &
-                +( x1)*reciprocal_lattice_vec(:,3) 
+    if(ik >= nk_s .and. ik <= nk_e)then
+      kvec0(:,ik) =( x3)*reciprocal_lattice_vec(:,1) &
+                  +( x2)*reciprocal_lattice_vec(:,2) &
+                  +( x1)*reciprocal_lattice_vec(:,3) 
 
-    alpha_fsa(ik) = alpha
+      alpha_fsa(ik) = alpha
+    end if
 
 ! x3,x2,x1,-
     ik = ik + 1
-    kvec0(:,ik) =(-x3)*reciprocal_lattice_vec(:,1) &
-                +(-x2)*reciprocal_lattice_vec(:,2) &
-                +(-x1)*reciprocal_lattice_vec(:,3) 
+    if(ik >= nk_s .and. ik <= nk_e)then
+      kvec0(:,ik) =(-x3)*reciprocal_lattice_vec(:,1) &
+                  +(-x2)*reciprocal_lattice_vec(:,2) &
+                  +(-x1)*reciprocal_lattice_vec(:,3) 
 
-    alpha_fsa(ik) = alpha
+      alpha_fsa(ik) = alpha
+    end if
 
 
   end do
