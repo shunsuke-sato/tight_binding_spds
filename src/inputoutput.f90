@@ -1,6 +1,9 @@
 module inputoutput
   use parallel
   use communication
+#ifdel profile
+  use profile
+#endif  
   implicit none
 
   private
@@ -43,7 +46,10 @@ contains
 !-------------------------------------------------------------------------------
   subroutine init_inputoutput
     implicit none
-
+#ifdel profile
+    call start_profile(NPRO_init_inputoutput)
+#endif
+    
     if(if_root_global)then
       open(id_inputfile,file=name_inputfile)
       open(id_input_log,file=name_input_log)
@@ -51,16 +57,25 @@ contains
 
     id_outputfile_sequential = 20
 
+#ifdel profile
+    call end_profile(NPRO_init_inputoutput)
+#endif    
   end subroutine init_inputoutput
 !-------------------------------------------------------------------------------
   subroutine fin_inputoutput
     implicit none
-
+#ifdel profile
+    call start_profile(NPRO_fin_inputoutput)
+#endif
+    
     if(if_root_global)then
       close(id_inputfile)
       close(id_input_log)
     end if
-
+   
+#ifdel profile
+    call end_profile(NPRO_fin_inputoutput)
+#endif    
   end subroutine fin_inputoutput
 !-------------------------------------------------------------------------------
   subroutine read_basic_input_character(name, val, val_default, if_default)

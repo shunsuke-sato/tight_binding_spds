@@ -24,7 +24,10 @@ contains
     implicit  none
     integer :: it
     real(8) :: jt_t(3), Act_t(3), num_elec
-
+#ifdel profile
+    call start_profile(NPRO_electron_dynamics_calculation)
+#endif
+    
     call input_parameter_for_time_propagation
     call initialize_electron_dynamics
 
@@ -54,14 +57,23 @@ contains
 
     if(if_root_global)close(40)
 
+#ifdel profile
+    call end_profile(NPRO_electron_dynamics_calculation)
+#endif        
   end subroutine electron_dynamics_calculation
 !----------------------------------------------------------------------------------------
   subroutine initialize_electron_dynamics
     implicit none
-
+#ifdel profile
+    call start_profile(NPRO_initialize_electron_dynamics)
+#endif
+    
     call set_equilibrium_density_matrix
     call init_laser    
 
+#ifdel profile
+    call end_profile(NPRO_initialize_electron_dynamics)
+#endif            
   end subroutine initialize_electron_dynamics
 !----------------------------------------------------------------------------------------
   subroutine input_parameter_for_time_propagation
