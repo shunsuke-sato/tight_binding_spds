@@ -1,11 +1,14 @@
-module profile
+module profile_m
+  use mpi
   use parallel
   implicit none
 
   private
 
   public :: init_profile, &
-            fin_profile
+            fin_profile, &
+            start_profile, &
+            end_profile
 
   integer,parameter,public :: &
        NPROFILE_TOTAL = 0, &
@@ -94,4 +97,4 @@ contains
   end subroutine end_profile  
   !-------------------------------------------------------------------------------
 !-------------------------------------------------------------------------------
-end module profile
+end module profile_m

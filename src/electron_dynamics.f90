@@ -7,6 +7,9 @@ module electron_dynamics
   use inputoutput
   use electronic_system
   use laser
+#ifdef profile
+  use profile_m
+#endif
   implicit none
   private
 
@@ -24,7 +27,7 @@ contains
     implicit  none
     integer :: it
     real(8) :: jt_t(3), Act_t(3), num_elec
-#ifdel profile
+#ifdef profile
     call start_profile(NPRO_electron_dynamics_calculation)
 #endif
     
@@ -57,21 +60,21 @@ contains
 
     if(if_root_global)close(40)
 
-#ifdel profile
+#ifdef profile
     call end_profile(NPRO_electron_dynamics_calculation)
 #endif        
   end subroutine electron_dynamics_calculation
 !----------------------------------------------------------------------------------------
   subroutine initialize_electron_dynamics
     implicit none
-#ifdel profile
+#ifdef profile
     call start_profile(NPRO_initialize_electron_dynamics)
 #endif
     
     call set_equilibrium_density_matrix
     call init_laser    
 
-#ifdel profile
+#ifdef profile
     call end_profile(NPRO_initialize_electron_dynamics)
 #endif            
   end subroutine initialize_electron_dynamics

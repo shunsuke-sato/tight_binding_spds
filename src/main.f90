@@ -4,7 +4,7 @@ program main
   use electronic_system
   use electron_dynamics
 #ifdef profile
-  use profile
+  use profile_m
 #endif
   implicit none
 

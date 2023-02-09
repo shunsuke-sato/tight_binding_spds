@@ -1,6 +1,6 @@
 #FC = mpif90 -O2 ## gfotran
-#FC = mpif90 -O0 -fbounds-check ## gfotran
-FC = mpif90 -Dprofile -O2 ## gfotran
+FC = mpif90 -O0 -fbounds-check -cpp -Dprofile ## gfotran
+#FC = mpif90 -cpp -Dprofile -O2 ## gfotran
 #FC = mpif90 -O2 -pg ## gfotran
 #FC = mpiifort -O3 -ipo -xHOST  -L$MKL_HOME/lib/intel64  -lmkl_intel_lp64 -lmkl_core -lmkl_sequential -lpthread -lm -Xlinker -rpath=$MKL_HOME/lib/intel64 ## draco
 #FC = mpiifort -O3 -ipo -xHOST -L/mpcdf/soft/SLES122/common/intel/ps2017.7/17.0/linux/mkl/lib/intel64 -lmkl_intel_lp64 -lmkl_core -lmkl_sequential -lpthread -Wl,-rpath,/mpcdf/soft/SLES122/common/intel/ps2017.7/17.0/linux/mkl/lib/intel64 ## draco
@@ -16,10 +16,11 @@ VPATH = src:object
 
 
 PROG = tb_model
-OBJ = object/math.o object/parallel.o object/communication.o object/constants.o object/inputoutput.o object/electronic_system.o object/laser.o object/electron_dynamics.o object/main.o
+OBJ = object/math.o object/parallel.o object/profile.o object/communication.o object/constants.o object/inputoutput.o object/electronic_system.o object/laser.o object/electron_dynamics.o object/main.o
 
 $(PROG):math.o \
         parallel.o \
+        profile.o \
         communication.o \
         constants.o \
         inputoutput.o \
@@ -38,22 +39,25 @@ parallel.o:parallel.f90
 constants.o:constants.f90
 	$(FC) -c $< $(LN);mv $@  object 
 
-communication.o:communication.f90 parallel.o
+profile.o:profile.f90 parallel.o
 	$(FC) -c $< $(LN);mv $@  object 
 
-inputoutput.o:inputoutput.f90 parallel.o communication.o
+communication.o:communication.f90 parallel.o profile.o
 	$(FC) -c $< $(LN);mv $@  object 
 
-electronic_system.o:electronic_system.f90 parallel.o communication.o math.o constants.o inputoutput.o
+inputoutput.o:inputoutput.f90 parallel.o profile.o communication.o
 	$(FC) -c $< $(LN);mv $@  object 
 
-laser.o:laser.f90 parallel.o communication.o math.o constants.o inputoutput.o
+electronic_system.o:electronic_system.f90 parallel.o profile.o communication.o math.o constants.o inputoutput.o
 	$(FC) -c $< $(LN);mv $@  object 
 
-electron_dynamics.o:electron_dynamics.f90 electronic_system.o parallel.o communication.o math.o constants.o inputoutput.o laser.o
+laser.o:laser.f90 parallel.o profile.o communication.o math.o constants.o inputoutput.o
 	$(FC) -c $< $(LN);mv $@  object 
 
-main.o:main.f90 parallel.o inputoutput.o electronic_system.o electron_dynamics.o 
+electron_dynamics.o:electron_dynamics.f90 electronic_system.o parallel.o profile.o communication.o math.o constants.o inputoutput.o laser.o
+	$(FC) -c $< $(LN);mv $@  object 
+
+main.o:main.f90 parallel.o profile.o inputoutput.o electronic_system.o electron_dynamics.o 
 	$(FC) -c $< $(LN);mv $@  object 
 
 clean:

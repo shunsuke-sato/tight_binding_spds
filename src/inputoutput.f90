@@ -1,8 +1,8 @@
 module inputoutput
   use parallel
   use communication
-#ifdel profile
-  use profile
+#ifdef profile
+  use profile_m
 #endif  
   implicit none
 
@@ -46,7 +46,7 @@ contains
 !-------------------------------------------------------------------------------
   subroutine init_inputoutput
     implicit none
-#ifdel profile
+#ifdef profile
     call start_profile(NPRO_init_inputoutput)
 #endif
     
@@ -57,14 +57,14 @@ contains
 
     id_outputfile_sequential = 20
 
-#ifdel profile
+#ifdef profile
     call end_profile(NPRO_init_inputoutput)
 #endif    
   end subroutine init_inputoutput
 !-------------------------------------------------------------------------------
   subroutine fin_inputoutput
     implicit none
-#ifdel profile
+#ifdef profile
     call start_profile(NPRO_fin_inputoutput)
 #endif
     
@@ -73,7 +73,7 @@ contains
       close(id_input_log)
     end if
    
-#ifdel profile
+#ifdef profile
     call end_profile(NPRO_fin_inputoutput)
 #endif    
   end subroutine fin_inputoutput
