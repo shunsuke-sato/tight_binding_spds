@@ -15,8 +15,11 @@ module profile_m
        NPRO_init_inputoutput = 1, &
        NPRO_fin_inputoutput = 2, &
        NPRO_initialize_electron_dynamics = 3, &
-       NPRO_electron_dynamics_calculation = 4, &       
-       NUM_PROFILE = 4
+       NPRO_electron_dynamics_calculation = 4, &
+       NPRO_calc_current = 5, &
+       NPRO_calc_num_electron = 6, &
+       NPRO_dt_evolve = 7, &
+       NUM_PROFILE = 8
   
 ! timer
   type timer_t
@@ -40,6 +43,11 @@ contains
     profiler(NPRO_fin_inputoutput)%tag = "fin_inputoutput"
     profiler(NPRO_initialize_electron_dynamics)%tag = "initialize_electron_dynamics"
     profiler(NPRO_electron_dynamics_calculation)%tag = "electron_dynamics_calculation"
+    profiler(NPRO_calc_current)%tag = "calc_current"
+    profiler(NPRO_calc_num_electron)%tag = "calc_num_electron"
+    profiler(NPRO_dt_evolve)%tag = "dt_evolve"
+!    profiler()%tag = ""
+    
 
   end subroutine init_profile
 !-------------------------------------------------------------------------------

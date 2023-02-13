@@ -5,6 +5,9 @@ module electronic_system
   use math
   use constants
   use inputoutput
+#ifdef profile
+  use profile_m
+#endif  
   implicit none
   private
 
@@ -563,7 +566,9 @@ subroutine calc_current(Act_t, jt_t)
   real(8),intent(out) :: jt_t(3)
   real(8),allocatable :: Amat_tmp(:,:,:)
   integer :: ik, ib
-
+#ifdef profile
+    call start_profile(NPRO_calc_current)
+#endif
   jt_t = 0d0
   
 
@@ -593,7 +598,9 @@ subroutine calc_current(Act_t, jt_t)
   call comm_allreduce(jt_t)
   jt_t = jt_t/(nkpoint*volume)
 
-
+#ifdef profile
+    call end_profile(NPRO_calc_current)
+#endif        
 end subroutine calc_current
 !----------------------------------------------------------------------------
 subroutine calc_bandstructure_zincblende

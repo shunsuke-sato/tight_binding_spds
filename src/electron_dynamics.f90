@@ -34,8 +34,6 @@ contains
     call input_parameter_for_time_propagation
     call initialize_electron_dynamics
 
-
-
     call calc_vector_potential_time(tt(0), Act_t)
     call calc_current(Act_t, jt_t)
     call calc_num_electron(num_elec)
