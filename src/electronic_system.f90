@@ -870,7 +870,7 @@ subroutine dt_evolve_elec_system(Act_in,dt_in)
 
 end subroutine dt_evolve_elec_system
 !----------------------------------------------------------------------------
-subroutine dt_evolve_elec_system_mod(Act_1_in, act_2_in,dt_in)
+subroutine dt_evolve_elec_system_mod(Act_1_in, Act_2_in, dt_in)
   implicit none
   real(8),intent(in) :: Act_1_in(3), Act_2_in(3), dt_in
   integer :: ik, ib, ib1,ib2
@@ -922,7 +922,7 @@ subroutine dt_evolve_elec_system_mod(Act_1_in, act_2_in,dt_in)
     do ib1 = 1,ndim
       do ib2 = 1,ndim
         zUm(ib2,ib1)=sum(conjg(zham_mat_2(:,ib2,ik))*zham_mat_1(:,ib1,ik)) &
-            *exp(-0.5d0*zi*dt_in(eps_2(ib2)+eps_1(ib1)))
+            *exp(-0.5d0*zi*dt_in*(eps_2(ib2)+eps_1(ib1)))
       end do
     end do
     
