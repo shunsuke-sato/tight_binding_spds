@@ -84,6 +84,10 @@ module electronic_system
   real(8),allocatable :: alpha_fsa(:)
   integer :: npower_focal_spot_average
 
+! band freezing
+  logical :: if_band_frozen
+  real(8),allocatable :: blocking_matrix_band_frozen(:,:)
+
 contains
 !----------------------------------------------------------------------------
 subroutine initialize_electronic_system
@@ -112,8 +116,10 @@ subroutine initialize_electronic_system
     nkpoint = 12*num_sample_focal_spot_average
   end if
 
-
-
+  call read_basic_input('if_band_frozen',if_band_frozen,val_default = .false.)
+  allocate(blocking_matrix_band_frozen(nband,nband))
+  blocking_matrix_band_frozen(:,:) = 1d0
+  if(if_band_frozen)call set_blocking_matrix_band_frozen
 
   nk_average = nkpoint/comm_nproc_global
   nk_remainder = mod(nkpoint,comm_nproc_global)
@@ -926,6 +932,8 @@ subroutine dt_evolve_elec_system_mod(Act_1_in, Act_2_in, dt_in)
       end do
     end do
     
+! blocking to freeze the bands
+    zUm = zUm*blocking_matrix_band_frozen
 
 ! convert to the H1 basis expression
     zAmat_tmp = matmul( &
@@ -1140,6 +1148,47 @@ subroutine prepare_sampling_for_focal_spot_average
 
 end subroutine prepare_sampling_for_focal_spot_average
 !----------------------------------------------------------------------------
+subroutine set_blocking_matrix_band_frozen
+  implicit none
+  integer :: ib1, ib2
+  integer,allocatable :: nflag_include(:)
+
+  allocate(nflag_include(nband))
+
+  nflag_include( 1) = 1; nflag_include( 2) = 1
+  nflag_include( 3) = 1; nflag_include( 4) = 1
+  nflag_include( 5) = 1; nflag_include( 6) = 1
+  nflag_include( 7) = 1; nflag_include( 8) = 1  ! valence top
+
+  nflag_include( 9) = 1; nflag_include(10) = 1  ! conduction bottom
+  nflag_include(11) = 1; nflag_include(12) = 1
+  nflag_include(13) = 1; nflag_include(14) = 1
+  nflag_include(15) = 1; nflag_include(16) = 1
+  nflag_include(17) = 1; nflag_include(18) = 1
+  nflag_include(19) = 1; nflag_include(20) = 1
+  nflag_include(21) = 1; nflag_include(22) = 1
+  nflag_include(23) = 1; nflag_include(24) = 1
+  nflag_include(25) = 1; nflag_include(26) = 1
+  nflag_include(27) = 1; nflag_include(28) = 1
+  nflag_include(29) = 1; nflag_include(30) = 1
+  nflag_include(31) = 1; nflag_include(32) = 1
+  nflag_include(33) = 1; nflag_include(34) = 1
+  nflag_include(35) = 1; nflag_include(36) = 1
+  nflag_include(37) = 1; nflag_include(38) = 1
+  nflag_include(39) = 1; nflag_include(40) = 1
+
+
+  blocking_matrix_band_frozen = 1d0
+! include only the bottom of conduction and top of valence bands
+  do ib1 = 1, nband
+    do ib2 = 1, nband
+      if(ib1 /= ib2)then
+        blocking_matrix_band_frozen(ib1,ib2)=nflag_include(ib1)*nflag_include(ib2)
+      end if
+    end do
+  end do
+
+end subroutine set_blocking_matrix_band_frozen
 !----------------------------------------------------------------------------
 !----------------------------------------------------------------------------
 !----------------------------------------------------------------------------

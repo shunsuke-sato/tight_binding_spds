@@ -2,6 +2,8 @@ nk1 = 2
 nk2 = 2
 nk3 = 2
 
+if_band_frozen = y
+
 time_propagation_fs = 100d0
 dt = 1d0
 
