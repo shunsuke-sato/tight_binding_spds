@@ -206,9 +206,9 @@ subroutine initialize_electronic_system
         do ik3 = 1, nk3
           ik = ik + 1
           if(ik >= nk_s .and. ik <= nk_e)then
-            kvec0(:,ik) = (ik1-1)/dble(nk1)*reciprocal_lattice_vec(:,1) &
-                +(ik2-1)/dble(nk2)*reciprocal_lattice_vec(:,2) &
-                +(ik3-1)/dble(nk3)*reciprocal_lattice_vec(:,3) 
+            kvec0(:,ik) = (2*ik1-nk1-1)/dble(2*nk1)*reciprocal_lattice_vec(:,1) &
+                +(2*ik2-nk2-1)/dble(2*nk2)*reciprocal_lattice_vec(:,2) &
+                +(2*ik3-nk3-1)/dble(2*nk3)*reciprocal_lattice_vec(:,3) 
           end if
         end do
       end do
