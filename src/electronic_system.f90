@@ -934,6 +934,7 @@ subroutine dt_evolve_elec_system_mod(Act_1_in, Act_2_in, dt_in)
     
 ! blocking to freeze the bands
     zUm = zUm*blocking_matrix_band_frozen
+    call unitary_correction(zUm, ndim)
 
 ! convert to the H1 basis expression
     zAmat_tmp = matmul( &
@@ -987,6 +988,33 @@ subroutine dt_evolve_elec_system_mod(Act_1_in, Act_2_in, dt_in)
 
 
   end do
+
+  contains
+    subroutine unitary_correction(zAmat, n)
+      implicit none
+      integer,intent(in) :: n
+      complex(8),intent(inout) :: zAmat(n,n)
+      integer :: n1, n2
+      complex(8) :: ztmp
+      real(8) :: tmp
+
+
+! Gram-Schmidt orthogonormalization
+      do n1 = 1, n
+! normalization
+        tmp = sum(abs(zAmat(:,n1))**2)
+        zAmat(:,n1) = zAmat(:,n1)/sqrt(tmp)
+! orthogonalization
+        do n2 = 1, n1-1
+          ztmp = sum(conjg(zAmat(:,n2))*zAmat(:,n1))
+          zAmat(:,n1) = zAmat(:,n1) - zAmat(:,n2)*ztmp
+        end do
+! normalization
+        tmp = sum(abs(zAmat(:,n1))**2)
+        zAmat(:,n1) = zAmat(:,n1)/sqrt(tmp)
+      end do
+
+    end subroutine unitary_correction
 
 end subroutine dt_evolve_elec_system_mod
 !----------------------------------------------------------------------------
