@@ -934,7 +934,7 @@ subroutine dt_evolve_elec_system_mod(Act_1_in, Act_2_in, dt_in)
     
 ! blocking to freeze the bands
     zUm = zUm*blocking_matrix_band_frozen
-!    call unitary_correction(zUm, ndim)
+    call unitary_correction(zUm, ndim)
 
 ! convert to the H1 basis expression
     zAmat_tmp = matmul( &
