@@ -109,6 +109,11 @@ contains
     implicit none
     integer,intent(in) :: it
     real(8) :: ttt, Act(3)
+
+#ifdef profile
+    call start_profile(NPRO_dt_evolve)
+#endif
+
     Act = 0d0
     
 !! === Start: propagation from tt(it-1) to tt(it-1)+dt/2 ===
@@ -125,6 +130,10 @@ contains
     call dt_evolve_elec_system(Act,dt*0.5d0)
 !! === End: propagation from tt(it-1)+dt/2 to tt(it) ===
     
+#ifdef profile
+    call end_profile(NPRO_dt_evolve)
+#endif        
+
   end subroutine dt_evolve
 !----------------------------------------------------------------------------------------
   subroutine  dt_evolve_mod(it)
@@ -132,12 +141,20 @@ contains
     integer,intent(in) :: it
     real(8) :: ttt, Act_1(3), Act_2(3)
 
+#ifdef profile
+    call start_profile(NPRO_dt_evolve)
+#endif
+
     ttt = tt(it-1)
     call calc_vector_potential_time(ttt, Act_1)
     ttt = tt(it)
     call calc_vector_potential_time(ttt, Act_2)
 
     call dt_evolve_elec_system_mod(Act_1, Act_2 ,dt)
+
+#ifdef profile
+    call end_profile(NPRO_dt_evolve)
+#endif        
 
   end subroutine dt_evolve_mod
 !----------------------------------------------------------------------------------------

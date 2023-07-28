@@ -100,6 +100,11 @@ subroutine initialize_electronic_system
   integer :: ik1,ik2,ik3,ik
   real(8) :: T1_relax_fs, T2_relax_fs
 
+#ifdef profile
+    call start_profile(NPRO_initialize_electronic_system)
+#endif
+
+
   nband = 2*2*(1+3+5+1) ! 40 bands
   lattice_const = 5.4635d0*angstrom
 
@@ -224,6 +229,11 @@ subroutine initialize_electronic_system
   call read_basic_input('T2_relax_fs',T2_relax_fs,val_default = -1d0)
   T1_relax = T1_relax_fs*fs
   T2_relax = T2_relax_fs*fs
+
+
+#ifdef profile
+    call end_profile(NPRO_initialize_electronic_system)
+#endif    
 
 contains
   function cross_product(vec1, vec2)
@@ -1029,7 +1039,9 @@ subroutine calc_num_electron(num_elec)
   implicit none
   real(8),intent(out) :: num_elec
   integer :: ik, ib
-
+#ifdef profile
+    call start_profile(NPRO_calc_num_electron)
+#endif
 
   num_elec = 0d0
   do ik = nk_s, nk_e
@@ -1040,6 +1052,10 @@ subroutine calc_num_electron(num_elec)
 
   call comm_allreduce(num_elec)
   num_elec = num_elec/(nkpoint)
+
+#ifdef profile
+    call end_profile(NPRO_calc_num_electron)
+#endif    
   
 end subroutine calc_num_electron
 !----------------------------------------------------------------------------

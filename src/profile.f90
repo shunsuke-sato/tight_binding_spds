@@ -19,7 +19,8 @@ module profile_m
        NPRO_calc_current = 5, &
        NPRO_calc_num_electron = 6, &
        NPRO_dt_evolve = 7, &
-       NUM_PROFILE = 8
+       NPRO_initialize_electronic_system = 8, &
+       NUM_PROFILE = 9
   
 ! timer
   type timer_t
@@ -46,6 +47,7 @@ contains
     profiler(NPRO_calc_current)%tag = "calc_current"
     profiler(NPRO_calc_num_electron)%tag = "calc_num_electron"
     profiler(NPRO_dt_evolve)%tag = "dt_evolve"
+    profiler(NPRO_initialize_electronic_system)%tag = "initialize_electronic_system"
 !    profiler()%tag = ""
     
 
@@ -79,9 +81,10 @@ contains
 
     if(if_root_global)then
        open(201,file="profile_data.out")
-       do iprofile = 0, NUM_PROFILE       
-          write(201,"(A,2x,A,2x,e26.16e3)")trim(profiler(iprofile)%tag)," (sec.)=" &
-               ,profiler(iprofile)%elapse
+       do iprofile = 0, NUM_PROFILE-1       
+          write(201,"(A32,2x,A10,2x,e26.16e3,A10,f8.2)")trim(profiler(iprofile)%tag)," (sec.)=" &
+               ,profiler(iprofile)%elapse, "rate (%)" &
+               ,100d0*profiler(iprofile)%elapse/profiler(NPROFILE_TOTAL)%elapse
        end do
        close(201)
     end if
