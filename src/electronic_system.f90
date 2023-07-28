@@ -12,6 +12,7 @@ module electronic_system
             calc_bandstructure_zincblende, &
             set_equilibrium_density_matrix, &
             dt_evolve_elec_system, &
+            dt_evolve_elec_system_mod, &
             calc_current, &
             calc_num_electron
 
@@ -83,6 +84,10 @@ module electronic_system
   real(8),allocatable :: alpha_fsa(:)
   integer :: npower_focal_spot_average
 
+! band freezing
+  logical :: if_band_frozen
+  real(8),allocatable :: blocking_matrix_band_frozen(:,:)
+
 contains
 !----------------------------------------------------------------------------
 subroutine initialize_electronic_system
@@ -111,8 +116,10 @@ subroutine initialize_electronic_system
     nkpoint = 12*num_sample_focal_spot_average
   end if
 
-
-
+  call read_basic_input('if_band_frozen',if_band_frozen,val_default = .false.)
+  allocate(blocking_matrix_band_frozen(nband,nband))
+  blocking_matrix_band_frozen(:,:) = 1d0
+  if(if_band_frozen)call set_blocking_matrix_band_frozen
 
   nk_average = nkpoint/comm_nproc_global
   nk_remainder = mod(nkpoint,comm_nproc_global)
@@ -199,9 +206,9 @@ subroutine initialize_electronic_system
         do ik3 = 1, nk3
           ik = ik + 1
           if(ik >= nk_s .and. ik <= nk_e)then
-            kvec0(:,ik) = (ik1-1)/dble(nk1)*reciprocal_lattice_vec(:,1) &
-                +(ik2-1)/dble(nk2)*reciprocal_lattice_vec(:,2) &
-                +(ik3-1)/dble(nk3)*reciprocal_lattice_vec(:,3) 
+            kvec0(:,ik) = (2*ik1-nk1-1)/dble(2*nk1)*reciprocal_lattice_vec(:,1) &
+                +(2*ik2-nk2-1)/dble(2*nk2)*reciprocal_lattice_vec(:,2) &
+                +(2*ik3-nk3-1)/dble(2*nk3)*reciprocal_lattice_vec(:,3) 
           end if
         end do
       end do
@@ -869,6 +876,148 @@ subroutine dt_evolve_elec_system(Act_in,dt_in)
 
 end subroutine dt_evolve_elec_system
 !----------------------------------------------------------------------------
+subroutine dt_evolve_elec_system_mod(Act_1_in, Act_2_in, dt_in)
+  implicit none
+  real(8),intent(in) :: Act_1_in(3), Act_2_in(3), dt_in
+  integer :: ik, ib, ib1,ib2
+  complex(8),allocatable :: zAmat_tmp(:,:),zBmat_tmp(:,:)
+  real(8),allocatable :: ref_pop(:)
+  real(8),allocatable :: eps_1(:),eps_2(:)
+  complex(8),allocatable :: zham_mat_1(:,:,:),zham_mat_2(:,:,:)
+  complex(8),allocatable :: zUm(:,:)
+!LAPACK
+  integer :: ndim
+  integer :: lwork
+  complex(8),allocatable :: work_lp(:)
+  real(8),allocatable :: rwork(:),w(:)
+  integer :: info
+
+  ndim = 40
+  lwork = 4*ndim**2+4*ndim+256
+  allocate(work_lp(lwork),rwork(3*ndim-2),w(ndim))
+ 
+
+!LAPACK
+  allocate(eps_1(ndim),eps_2(ndim))
+  allocate(zham_mat_1(nband,nband,nk_s:nk_e),zham_mat_2(nband,nband,nk_s:nk_e))
+  allocate(zAmat_tmp(nband,nband),zBmat_tmp(nband,nband))
+  allocate(ref_pop(nband))
+  ref_pop(1:8) = 1d0; ref_pop(9:nband) = 0d0
+  allocate(zUm(ndim,ndim))
+
+
+  do ik = nk_s, nk_e
+    kvec(:,ik) = kvec0(:,ik) + alpha_fsa(ik)**(1d0/npower_focal_spot_average)*Act_1_in(:)
+  end do
+  call calc_two_center_integral
+  call calc_zham_mat
+  zham_mat_1 = zham_mat
+
+  do ik = nk_s, nk_e
+    kvec(:,ik) = kvec0(:,ik) + alpha_fsa(ik)**(1d0/npower_focal_spot_average)*Act_2_in(:)
+  end do
+  call calc_two_center_integral
+  call calc_zham_mat
+  zham_mat_2 = zham_mat
+
+
+  do ik = nk_s, nk_e
+    call zheev('V', 'U', ndim, zham_mat_1(1:ndim,1:ndim,ik), ndim, eps_1, work_lp, lwork, rwork, info)
+    call zheev('V', 'U', ndim, zham_mat_2(1:ndim,1:ndim,ik), ndim, eps_2, work_lp, lwork, rwork, info)
+
+    do ib1 = 1,ndim
+      do ib2 = 1,ndim
+        zUm(ib2,ib1)=sum(conjg(zham_mat_2(:,ib2,ik))*zham_mat_1(:,ib1,ik)) &
+            *exp(-0.5d0*zi*dt_in*(eps_2(ib2)+eps_1(ib1)))
+      end do
+    end do
+    
+! blocking to freeze the bands
+    zUm = zUm*blocking_matrix_band_frozen
+    call unitary_correction(zUm, ndim)
+
+! convert to the H1 basis expression
+    zAmat_tmp = matmul( &
+        matmul(conjg(transpose(zham_mat_1(:,:,ik))),zrho_dm(:,:,ik)) &
+        ,zham_mat_1(:,:,ik))
+
+! apply the first relaxation at t
+    do ib = 1, nband
+      zAmat_tmp(ib,ib)=zAmat_tmp(ib,ib)-ref_pop(ib)
+    end do
+    
+    do ib1 = 1, nband
+      zBmat_tmp(ib1,ib1) = exp(-0.5d0*dt_in/T1_relax)
+      do ib2 = ib1+1,nband
+        zBmat_tmp(ib1,ib2) = exp(-0.5d0*dt_in/T2_relax)
+        zBmat_tmp(ib2,ib1) = exp(-0.5d0*dt_in/T2_relax)
+      end do
+    end do
+
+    zBmat_tmp = zAmat_tmp*zBmat_tmp 
+    do ib = 1, nband
+      zBmat_tmp(ib,ib)=zBmat_tmp(ib,ib)+ref_pop(ib)
+    end do
+
+
+! apply the time propagation from t to t+dt
+    zAmat_tmp = matmul(zUm(:,:),matmul(zBmat_tmp, conjg(transpose(zUm(:,:)))))
+
+! apply the second relaxation at t+dt
+    do ib = 1, nband
+      zAmat_tmp(ib,ib)=zAmat_tmp(ib,ib)-ref_pop(ib)
+    end do
+    
+    do ib1 = 1, nband
+      zBmat_tmp(ib1,ib1) = exp(-0.5d0*dt_in/T1_relax)
+      do ib2 = ib1+1,nband
+        zBmat_tmp(ib1,ib2) = exp(-0.5d0*dt_in/T2_relax)
+        zBmat_tmp(ib2,ib1) = exp(-0.5d0*dt_in/T2_relax)
+      end do
+    end do
+
+    zBmat_tmp = zAmat_tmp*zBmat_tmp 
+    do ib = 1, nband
+      zBmat_tmp(ib,ib)=zBmat_tmp(ib,ib)+ref_pop(ib)
+    end do
+
+! conver to the original basis expression
+    zrho_dm(:,:,ik) = matmul( &
+        matmul(zham_mat_2(:,:,ik),zBmat_tmp) &
+        ,conjg(transpose(zham_mat_2(:,:,ik))))
+
+
+  end do
+
+  contains
+    subroutine unitary_correction(zAmat, n)
+      implicit none
+      integer,intent(in) :: n
+      complex(8),intent(inout) :: zAmat(n,n)
+      integer :: n1, n2
+      complex(8) :: ztmp
+      real(8) :: tmp
+
+
+! Gram-Schmidt orthogonormalization
+      do n1 = 1, n
+! normalization
+        tmp = sum(abs(zAmat(:,n1))**2)
+        zAmat(:,n1) = zAmat(:,n1)/sqrt(tmp)
+! orthogonalization
+        do n2 = 1, n1-1
+          ztmp = sum(conjg(zAmat(:,n2))*zAmat(:,n1))
+          zAmat(:,n1) = zAmat(:,n1) - zAmat(:,n2)*ztmp
+        end do
+! normalization
+        tmp = sum(abs(zAmat(:,n1))**2)
+        zAmat(:,n1) = zAmat(:,n1)/sqrt(tmp)
+      end do
+
+    end subroutine unitary_correction
+
+end subroutine dt_evolve_elec_system_mod
+!----------------------------------------------------------------------------
 subroutine calc_num_electron(num_elec)
   implicit none
   real(8),intent(out) :: num_elec
@@ -1027,6 +1176,51 @@ subroutine prepare_sampling_for_focal_spot_average
 
 end subroutine prepare_sampling_for_focal_spot_average
 !----------------------------------------------------------------------------
+subroutine set_blocking_matrix_band_frozen
+  implicit none
+  integer :: ib1, ib2
+  integer,allocatable :: nflag_include(:)
+
+  allocate(nflag_include(nband))
+
+  nflag_include( 1) = 1; nflag_include( 2) = 1
+  nflag_include( 3) = 1; nflag_include( 4) = 1
+  nflag_include( 5) = 1; nflag_include( 6) = 1
+  nflag_include( 7) = 1; nflag_include( 8) = 1  ! valence top
+
+  nflag_include( 9) = 1; nflag_include(10) = 1  ! conduction bottom
+  nflag_include(11) = 1; nflag_include(12) = 1
+  nflag_include(13) = 1; nflag_include(14) = 1
+  nflag_include(15) = 1; nflag_include(16) = 1
+  nflag_include(17) = 1; nflag_include(18) = 1
+  nflag_include(19) = 1; nflag_include(20) = 1
+  nflag_include(21) = 1; nflag_include(22) = 1
+  nflag_include(23) = 1; nflag_include(24) = 1
+  nflag_include(25) = 1; nflag_include(26) = 1
+  nflag_include(27) = 1; nflag_include(28) = 1
+  nflag_include(29) = 1; nflag_include(30) = 1
+  nflag_include(31) = 1; nflag_include(32) = 1
+  nflag_include(33) = 1; nflag_include(34) = 1
+  nflag_include(35) = 1; nflag_include(36) = 1
+  nflag_include(37) = 1; nflag_include(38) = 1
+  nflag_include(39) = 1; nflag_include(40) = 1
+
+
+  blocking_matrix_band_frozen = 1d0
+! include only the bottom of conduction and top of valence bands
+  do ib1 = 1, nband
+    do ib2 = 1, nband
+      if(ib1 /= ib2)then
+        if(mod(ib1,2)==1 .and. ib2-ib1 == 1)then
+        else if(mod(ib1,2)==0 .and. ib1-ib2 ==1)then
+        else
+          blocking_matrix_band_frozen(ib1,ib2)=nflag_include(ib1)*nflag_include(ib2)
+        end if
+      end if
+    end do
+  end do
+
+end subroutine set_blocking_matrix_band_frozen
 !----------------------------------------------------------------------------
 !----------------------------------------------------------------------------
 !----------------------------------------------------------------------------

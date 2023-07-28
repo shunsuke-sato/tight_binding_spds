@@ -42,7 +42,7 @@ contains
 
     do it = 1, n_time_step
       if(if_root_global)write(*,*)'it=',it
-      call dt_evolve(it)
+      call dt_evolve_mod(it)
 
       call calc_vector_potential_time(tt(it), Act_t)
       call calc_current(Act_t, jt_t)
@@ -114,6 +114,19 @@ contains
     
   end subroutine dt_evolve
 !----------------------------------------------------------------------------------------
+  subroutine  dt_evolve_mod(it)
+    implicit none
+    integer,intent(in) :: it
+    real(8) :: ttt, Act_1(3), Act_2(3)
+
+    ttt = tt(it-1)
+    call calc_vector_potential_time(ttt, Act_1)
+    ttt = tt(it)
+    call calc_vector_potential_time(ttt, Act_2)
+
+    call dt_evolve_elec_system_mod(Act_1, Act_2 ,dt)
+
+  end subroutine dt_evolve_mod
 !----------------------------------------------------------------------------------------
 !----------------------------------------------------------------------------------------
 !----------------------------------------------------------------------------------------
