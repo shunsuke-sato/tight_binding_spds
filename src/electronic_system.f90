@@ -953,7 +953,14 @@ subroutine dt_evolve_elec_system_mod(Act_1_in, Act_2_in, dt_in)
   call calc_zham_mat
   zham_mat_2 = zham_mat
 
-
+!$acc kernels &
+!$acc copyin(ndim, zham_mat_1(:,:,:),zham_mat_2(:,:,:), blocking_matrix_band_frozen(:,:) &
+!$acc ,ref_pop(:), T1_relax, T2_relax, dt_in &
+!$acc ,NPRO_zheev_in_dt_evolve_elec_system) &
+!$acc copy(zrho_dm(:,:,:)) &
+!$acc create(eps_1(:), work_lp(:), rwork, info &
+!$acc zUm(:,:), zAmat_tmp(:,:), zBmat_tmp(:,:))
+!$acc loop independent private(eps_1, work_lp, zUm, zAmat_tmp, zBmat_tmp)
   do ik = nk_s, nk_e
 #ifdef profile
     call start_profile(NPRO_zheev_in_dt_evolve_elec_system)
@@ -1029,6 +1036,7 @@ subroutine dt_evolve_elec_system_mod(Act_1_in, Act_2_in, dt_in)
 
 
   end do
+!$acc end kernels
 
   contains
     subroutine unitary_correction(zAmat, n)
