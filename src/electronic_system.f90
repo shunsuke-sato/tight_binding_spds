@@ -253,6 +253,10 @@ subroutine calc_two_center_integral
   real(8) :: l,m,n
   integer :: i
 
+#ifdef profile
+    call start_profile(NPRO_calc_two_center_integral)
+#endif
+
   E2c_int = 0d0
 
   do i = 1, num_nearest_neighbor
@@ -447,6 +451,11 @@ subroutine calc_two_center_integral
 
   end do
 
+
+#ifdef profile
+    call end_profile(NPRO_calc_two_center_integral)
+#endif    
+
 end subroutine calc_two_center_integral
 !----------------------------------------------------------------------------
 subroutine calc_zham_mat
@@ -454,6 +463,9 @@ subroutine calc_zham_mat
   integer :: ik,i,ia,ic
   complex(8) :: zphase
 
+#ifdef profile
+    call start_profile(NPRO_calc_zham_mat)
+#endif
 
   zham_mat = 0d0
   do ik = nk_s, nk_e
@@ -529,6 +541,10 @@ subroutine calc_zham_mat
   zham_mat(14,20+13,:) = conjg(zham_mat(20+13,14,:))           ! <z; up |SO| y;down>
   zham_mat(13,12,:)    = conjg(zham_mat(12,13,:))               ! <y; up  |SO| x;up> !! check
   zham_mat(13+20,12+20,:) = conjg(zham_mat(12+20,13+20,:))      ! <y; down|SO| x;down> !! check
+
+#ifdef profile
+    call end_profile(NPRO_calc_zham_mat)
+#endif    
 
 end subroutine calc_zham_mat
 !----------------------------------------------------------------------------
@@ -939,8 +955,16 @@ subroutine dt_evolve_elec_system_mod(Act_1_in, Act_2_in, dt_in)
 
 
   do ik = nk_s, nk_e
+#ifdef profile
+    call start_profile(NPRO_zheev_in_dt_evolve_elec_system)
+#endif
     call zheev('V', 'U', ndim, zham_mat_1(1:ndim,1:ndim,ik), ndim, eps_1, work_lp, lwork, rwork, info)
     call zheev('V', 'U', ndim, zham_mat_2(1:ndim,1:ndim,ik), ndim, eps_2, work_lp, lwork, rwork, info)
+
+#ifdef profile
+    call end_profile(NPRO_zheev_in_dt_evolve_elec_system)
+#endif
+
 
     do ib1 = 1,ndim
       do ib2 = 1,ndim

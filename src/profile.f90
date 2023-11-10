@@ -20,7 +20,10 @@ module profile_m
        NPRO_calc_num_electron = 6, &
        NPRO_dt_evolve = 7, &
        NPRO_initialize_electronic_system = 8, &
-       NUM_PROFILE = 9
+       NPRO_calc_two_center_integral = 9, &
+       NPRO_calc_zham_mat = 10, &
+       NPRO_zheev_in_dt_evolve_elec_system = 11, &
+       NUM_PROFILE = 12
   
 ! timer
   type timer_t
@@ -48,6 +51,10 @@ contains
     profiler(NPRO_calc_num_electron)%tag = "calc_num_electron"
     profiler(NPRO_dt_evolve)%tag = "dt_evolve"
     profiler(NPRO_initialize_electronic_system)%tag = "initialize_electronic_system"
+    profiler(NPRO_calc_two_center_integral)%tag = "calc_two_center_integral"
+    profiler(NPRO_calc_zham_mat)%tag = "calc_zham_mat"
+    profiler(NPRO_zheev_in_dt_evolve_elec_system)%tag = "zheev_in_dt_evolve_elec_system"
+
 !    profiler()%tag = ""
     
 
