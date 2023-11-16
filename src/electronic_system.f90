@@ -5,9 +5,7 @@ module electronic_system
   use math
   use constants
   use inputoutput
-#ifdef profile
   use profile_m
-#endif  
   implicit none
   private
 
@@ -955,22 +953,21 @@ subroutine dt_evolve_elec_system_mod(Act_1_in, Act_2_in, dt_in)
 
 !$acc kernels &
 !$acc copyin(ndim, zham_mat_1(:,:,:),zham_mat_2(:,:,:), blocking_matrix_band_frozen(:,:) &
-!$acc ,ref_pop(:), T1_relax, T2_relax, dt_in &
-!$acc ,NPRO_zheev_in_dt_evolve_elec_system) &
+!$acc ,ref_pop(:), T1_relax, T2_relax, dt_in) &
 !$acc copy(zrho_dm(:,:,:)) &
 !$acc create(eps_1(:), work_lp(:), rwork, info &
-!$acc zUm(:,:), zAmat_tmp(:,:), zBmat_tmp(:,:))
+!$acc ,zUm(:,:), zAmat_tmp(:,:), zBmat_tmp(:,:))
 !$acc loop independent private(eps_1, work_lp, zUm, zAmat_tmp, zBmat_tmp)
   do ik = nk_s, nk_e
-#ifdef profile
-    call start_profile(NPRO_zheev_in_dt_evolve_elec_system)
-#endif
+!#ifdef profile
+!    call start_profile(NPRO_zheev_in_dt_evolve_elec_system)
+!#endif
     call zheev('V', 'U', ndim, zham_mat_1(1:ndim,1:ndim,ik), ndim, eps_1, work_lp, lwork, rwork, info)
     call zheev('V', 'U', ndim, zham_mat_2(1:ndim,1:ndim,ik), ndim, eps_2, work_lp, lwork, rwork, info)
 
-#ifdef profile
-    call end_profile(NPRO_zheev_in_dt_evolve_elec_system)
-#endif
+!#ifdef profile
+!    call end_profile(NPRO_zheev_in_dt_evolve_elec_system)
+!#endif
 
 
     do ib1 = 1,ndim
@@ -1040,6 +1037,7 @@ subroutine dt_evolve_elec_system_mod(Act_1_in, Act_2_in, dt_in)
 
   contains
     subroutine unitary_correction(zAmat, n)
+!$acc routine seq
       implicit none
       integer,intent(in) :: n
       complex(8),intent(inout) :: zAmat(n,n)
