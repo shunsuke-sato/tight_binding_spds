@@ -908,6 +908,8 @@ subroutine dt_evolve_elec_system(Act_in,dt_in)
 end subroutine dt_evolve_elec_system
 !----------------------------------------------------------------------------
 subroutine dt_evolve_elec_system_mod(Act_1_in, Act_2_in, dt_in)
+  use cublas_v2
+  use cusolverDn
   implicit none
   real(8),intent(in) :: Act_1_in(3), Act_2_in(3), dt_in
   integer :: ik, ib, ib1,ib2
@@ -916,12 +918,15 @@ subroutine dt_evolve_elec_system_mod(Act_1_in, Act_2_in, dt_in)
   real(8),allocatable :: eps_1(:),eps_2(:)
   complex(8),allocatable :: zham_mat_1(:,:,:),zham_mat_2(:,:,:)
   complex(8),allocatable :: zUm(:,:)
+
 !LAPACK
   integer :: ndim
   integer :: lwork
   complex(8),allocatable :: work_lp(:)
   real(8),allocatable :: rwork(:),w(:)
-  integer :: info
+  integer :: info, istat
+  type(cusolverDnHandle) :: h
+  type(syevjInfo) :: param
 
   ndim = 40
   lwork = 4*ndim**2+4*ndim+256
@@ -956,14 +961,40 @@ subroutine dt_evolve_elec_system_mod(Act_1_in, Act_2_in, dt_in)
 !$acc ,ref_pop(:), T1_relax, T2_relax, dt_in) &
 !$acc copy(zrho_dm(:,:,:)) &
 !$acc create(eps_1(:), work_lp(:), rwork, info &
-!$acc ,zUm(:,:), zAmat_tmp(:,:), zBmat_tmp(:,:))
+!$acc ,zUm(:,:), zAmat_tmp(:,:), zBmat_tmp(:,:), params)
 !$acc loop independent private(eps_1, work_lp, zUm, zAmat_tmp, zBmat_tmp)
   do ik = nk_s, nk_e
 !#ifdef profile
 !    call start_profile(NPRO_zheev_in_dt_evolve_elec_system)
 !#endif
-    call zheev('V', 'U', ndim, zham_mat_1(1:ndim,1:ndim,ik), ndim, eps_1, work_lp, lwork, rwork, info)
-    call zheev('V', 'U', ndim, zham_mat_2(1:ndim,1:ndim,ik), ndim, eps_2, work_lp, lwork, rwork, info)
+!    call zheev('V', 'U', ndim, zham_mat_1(1:ndim,1:ndim,ik), ndim, eps_1, work_lp, lwork, rwork, info)
+!    call zheev('V', 'U', ndim, zham_mat_2(1:ndim,1:ndim,ik), ndim, eps_2, work_lp, lwork, rwork, info)
+
+    istat = cusolverDnZheevj(&
+        h, &
+        CUSOLVER_EIG_MODE_VECTOR, &
+        CUBLAS_FILL_MODE_UPPER, &
+        int ndim, &
+        zham_mat_1(1:ndim,1:ndim,ik), &
+        ndim, &
+        eps_1, &
+        work_lp, &
+        lwork, &
+        info, &
+        params)
+
+    istat = cusolverDnZheevj(&
+        h, &
+        CUSOLVER_EIG_MODE_VECTOR, &
+        CUBLAS_FILL_MODE_UPPER, &
+        int ndim, &
+        zham_mat_2(1:ndim,1:ndim,ik), &
+        ndim, &
+        eps_2, &
+        work_lp, &
+        lwork, &
+        info, &
+        params)
 
 !#ifdef profile
 !    call end_profile(NPRO_zheev_in_dt_evolve_elec_system)
