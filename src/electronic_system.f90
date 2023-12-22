@@ -960,9 +960,9 @@ subroutine dt_evolve_elec_system_mod(Act_1_in, Act_2_in, dt_in)
 !$acc copyin(ndim, zham_mat_1(:,:,:),zham_mat_2(:,:,:), blocking_matrix_band_frozen(:,:) &
 !$acc ,ref_pop(:), T1_relax, T2_relax, dt_in) &
 !$acc copy(zrho_dm(:,:,:)) &
-!$acc create(eps_1(:), work_lp(:), rwork, info &
-!$acc ,zUm(:,:), zAmat_tmp(:,:), zBmat_tmp(:,:), params)
-!$acc loop independent private(eps_1, work_lp, zUm, zAmat_tmp, zBmat_tmp)
+!$acc create(eps_1(:),eps_2(:), work_lp(:), rwork, info &
+!$acc ,zUm(:,:), zAmat_tmp(:,:), zBmat_tmp(:,:))
+!$acc loop independent private(eps_1,eps_2, work_lp, zUm, zAmat_tmp, zBmat_tmp)
   do ik = nk_s, nk_e
 !#ifdef profile
 !    call start_profile(NPRO_zheev_in_dt_evolve_elec_system)
@@ -974,7 +974,7 @@ subroutine dt_evolve_elec_system_mod(Act_1_in, Act_2_in, dt_in)
         h, &
         CUSOLVER_EIG_MODE_VECTOR, &
         CUBLAS_FILL_MODE_UPPER, &
-        int ndim, &
+        ndim, &
         zham_mat_1(1:ndim,1:ndim,ik), &
         ndim, &
         eps_1, &
@@ -987,7 +987,7 @@ subroutine dt_evolve_elec_system_mod(Act_1_in, Act_2_in, dt_in)
         h, &
         CUSOLVER_EIG_MODE_VECTOR, &
         CUBLAS_FILL_MODE_UPPER, &
-        int ndim, &
+        ndim, &
         zham_mat_2(1:ndim,1:ndim,ik), &
         ndim, &
         eps_2, &
