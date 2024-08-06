@@ -1,22 +1,32 @@
-nk1 = 2
-nk2 = 2
-nk3 = 2
+nk1 = 8
+nk2 = 8
+nk3 = 8
 
-if_band_frozen = y
+#if_band_frozen = n
 
-time_propagation_fs = 100d0
+time_propagation_fs = 500d0
 dt = 1d0
 
 T1_relax_fs = 3d3
 T2_relax_fs = 20d0
 
 
-E0_pulse_1_x_Vm = 1d5
-E0_pulse_1_y_Vm = 0d5
-E0_pulse_1_z_Vm = 0d5
+E0_pulse_1_x_Vm = 0.57735026919d6
+E0_pulse_1_y_Vm = 0.57735026919d6
+E0_pulse_1_z_Vm = 0.57735026919d6
 
-omega_1_ev = 1.55d0
-pulse_width_1_fs = 100d0
+omega_1_ev = 0.10339169242306437d0
+pulse_width_1_fs = 300d0
+
+
+E0_pulse_2_x_Vm = 0.57735026919d4
+E0_pulse_2_y_Vm = 0.57735026919d4
+E0_pulse_2_z_Vm = 0.57735026919d4
+
+omega_2_ev = 2.0d0
+pulse_width_2_fs = 4d0
+time_delay_2_fs = 150d0
+
 
 
 
