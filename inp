@@ -25,7 +25,7 @@ E0_pulse_2_z_Vm = 0.57735026919d4
 
 omega_2_ev = 2.0d0
 pulse_width_2_fs = 4d0
-time_delay_2_fs = 150d0
+time_delay_2_fs = 148d0
 
 
 
