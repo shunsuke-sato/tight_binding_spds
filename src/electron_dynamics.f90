@@ -16,6 +16,8 @@ module electron_dynamics
   integer :: n_time_step
   real(8) :: dt, time_propagation
   real(8),allocatable :: tt(:)
+  real(8),allocatable :: jt_time(:,:), num_elec_time(:)
+  real(8),allocatable :: ac_time(:,:)
 
 
 contains
@@ -30,29 +32,32 @@ contains
 
 
 
-    call calc_vector_potential_time(tt(0), Act_t)
-    call calc_current(Act_t, jt_t)
-    call calc_num_electron(num_elec)
-
-    if(if_root_global)then
-      open(40,file="act_jt.out")
-      write(40,"(A)")"# tt (a.u.), num_elec, Act(1:3) (a.u.), jt(1:3) (a.u.)"
-      write(40,"(999e26.16e3)")tt(0),num_elec, Act_t, jt_t
-    end if
+    call calc_vector_potential_time(tt(0), Act_t); ac_time(:,0)=act_t(:)
+    call calc_current(Act_t, jt_t); jt_time(:,0) = jt_t(:)
+    call calc_num_electron(num_elec); num_elec_time(0) = num_elec
 
     do it = 1, n_time_step
       if(if_root_global)write(*,*)'it=',it
       call dt_evolve_mod(it)
 
-      call calc_vector_potential_time(tt(it), Act_t)
-      call calc_current(Act_t, jt_t)
-      call calc_num_electron(num_elec)
-      if(if_root_global)then
-        write(40,"(999e26.16e3)")tt(it),num_elec, Act_t, jt_t
-      end if
+      call calc_vector_potential_time(tt(it), Act_t); ac_time(:,it)=act_t(:)
+      call calc_current(Act_t, jt_t); jt_time(:,it) = jt_t(:)
+      call calc_num_electron(num_elec); num_elec_time(it) = num_elec
+
     end do
 
-    if(if_root_global)close(40)
+
+    call comm_allreduce(num_elec_time)
+    call comm_allreduce(jt_time)
+    if(if_root_global)then
+      open(40,file="act_jt.out")
+      write(40,"(A)")"# tt (a.u.), num_elec, Act(1:3) (a.u.), jt(1:3) (a.u.)"
+      do it = 0, n_time_step
+        write(40,"(999e26.16e3)")tt(it),num_elec_time(it), ac_time(:,it), jt_time(:,it)
+      end do
+      close(40)
+    end if
+
 
   end subroutine electron_dynamics_calculation
 !----------------------------------------------------------------------------------------
@@ -89,6 +94,9 @@ contains
     do it = 0, n_time_step
       tt(it) = dt*it
     end do
+
+
+    allocate(jt_time(3,0:n_time_step), num_elec_time(0:n_time_step), ac_time(3,0:n_time_step))
 
   end subroutine input_parameter_for_time_propagation
 !----------------------------------------------------------------------------------------

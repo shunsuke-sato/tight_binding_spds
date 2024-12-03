@@ -590,7 +590,7 @@ subroutine calc_current(Act_t, jt_t)
 
   end do
 
-  call comm_allreduce(jt_t)
+!  call comm_allreduce(jt_t)
   jt_t = jt_t/(nkpoint*volume)
 
 
@@ -1031,7 +1031,7 @@ subroutine calc_num_electron(num_elec)
     end do
   end do
 
-  call comm_allreduce(num_elec)
+!  call comm_allreduce(num_elec)
   num_elec = num_elec/(nkpoint)
   
 end subroutine calc_num_electron
