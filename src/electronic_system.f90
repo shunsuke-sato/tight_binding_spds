@@ -35,6 +35,9 @@ module electronic_system
   integer :: num_nearest_neighbor
   real(8),allocatable :: Rvec_ac(:,:) !! vector from anion to cation
 
+! k-shit
+  real(8) :: dk_shift1,dk_shift2,dk_shift3
+
 
 !tight binding parameters zinc blende
   real(8) :: energy_unit_tb
@@ -195,6 +198,11 @@ subroutine initialize_electronic_system
 !  include "include_tb_parameters/set_GaAs_Jancu1998.f90"
   include "include_tb_parameters/set_GaAs_Tan2013.f90"
 
+
+  call read_basic_input('dk_shift1',dk_shift1,val_default = 0d0)
+  call read_basic_input('dk_shift2',dk_shift2,val_default = 0d0)
+  call read_basic_input('dk_shift3',dk_shift3,val_default = 0d0)
+
   if(if_focal_spot_average)then
     call prepare_sampling_for_focal_spot_average
   else ! uniform sampling
@@ -206,9 +214,10 @@ subroutine initialize_electronic_system
         do ik3 = 1, nk3
           ik = ik + 1
           if(ik >= nk_s .and. ik <= nk_e)then
-            kvec0(:,ik) = (2*ik1-nk1-1)/dble(2*nk1)*reciprocal_lattice_vec(:,1) &
-                +(2*ik2-nk2-1)/dble(2*nk2)*reciprocal_lattice_vec(:,2) &
-                +(2*ik3-nk3-1)/dble(2*nk3)*reciprocal_lattice_vec(:,3) 
+            kvec0(:,ik) = &
+                 (2*ik1-nk1-1+2*dk_shift1)/dble(2*nk1)*reciprocal_lattice_vec(:,1) &
+                +(2*ik2-nk2-1+2*dk_shift2)/dble(2*nk2)*reciprocal_lattice_vec(:,2) &
+                +(2*ik3-nk3-1+2*dk_shift3)/dble(2*nk3)*reciprocal_lattice_vec(:,3) 
           end if
         end do
       end do
